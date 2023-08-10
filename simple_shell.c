@@ -4,6 +4,8 @@
 /**
  * main - create a custom shell
  * @envp: Array of environment variables
+ * @argc: is the number of items in argv
+ * @argv: is a NULL terminated array of strings
  *
  * Return: 0 always (Success)
  */
@@ -14,9 +16,13 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 	int status, i;
 	pid_t pid;
 	char *command_path;
+	int pipe = 1;
 
-	while (1)
+	while (1 && pipe)
 	{
+		if (isatty(STDIN_FILENO) == 0)
+			pipe = 0;
+
 		write(STDOUT_FILENO, ":)$ ", 4);
 		fflush(stdout);
 
