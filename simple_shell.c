@@ -1,34 +1,17 @@
 #include "shell.h"
 
-/**
- * env_builtin - Print the current environment variables
- * @env: Array of environment variables
- */
-void env_builtin(char **env)
-{
-	int i = 0;
-	size_t len;
-
-	while (env[i] != NULL)
-	{
-		len = strlen(env[i]);
-		write(STDOUT_FILENO, env[i], len);
-		write(STDOUT_FILENO, "\n", 1);
-		i++;
-	}
-}
 
 /**
  * main - create a custom shell
- * @env: The environment variables of the current process
+ *
  * Return: 0 always (Success)
  */
-int main(__attribute__((unused)) int argc, __attribute__((unused))
-		char *argv[], char *envp[])
+int main(void)
 {
 	char *buffer = NULL, **args;
 	int status, i;
 	pid_t pid;
+	char *command_path;
 
 	while (1)
 	{
@@ -41,34 +24,81 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 			free(buffer);
 			exit(EXIT_SUCCESS);
 		}
+
 		if (strcmp(buffer, "env") == 0)
 		{
 			env_builtin(envp);
 			continue;
 		}
+
 		args = tokens(buffer);
+
+		command_path = find_command_path(args[0]);
+		if (command_path == NULL)
+		{
+			perror("Command not found");
+			free(buffer);
+			free(args);
+			continue;
+		}
+
 		pid = fork();
 		if (pid == -1)
 		{
 			perror("Error creating a child process");
 			free(buffer);
+			free(args);
 			exit(EXIT_FAILURE);
 		}
 		else if (pid == 0)
 		{
-			execve(args[0], args, NULL);
+			execve(command_path, args, NULL);
 			perror("Error executing command");
 			exit(EXIT_FAILURE);
 		}
 		if (waitpid(pid, &status, 0) == -1)
 		{
 			perror("Error while waiting");
+			free(buffer);
+			free(args);
 			exit(EXIT_FAILURE);
 		}
+
+		free(command_path);
+
 		for (i = 0; args[i] != NULL; i++)
 			free(args[i]);
+
 		free(args);
 	}
 	free(buffer);
 	return (0);
+}
+
+char *find_command_path(const char *command)
+{
+	char *path = getenv("PATH");
+	char *path_copy = strdup(path);
+	char *dir = strtok(path_copy, ":");
+	char *full_path;
+
+	while (dir != NULL)
+	{
+		full_path = (char *)malloc(strlen(dir) + strlen(command) + 2);
+		if (full_path == NULL)
+		{
+			perror("Memory allocation failed");
+			exit(EXIT_FAILURE);
+		}
+		sprintf(full_path, "%s/%s", dir, command);
+		if (access(full_path, X_OK) == 0)
+		{
+			free(path_copy);
+			return full_path;
+		}
+		free(full_path);
+		dir = strtok(NULL, ":");
+	}
+	free(path_copy);
+	return NULL;
 }
