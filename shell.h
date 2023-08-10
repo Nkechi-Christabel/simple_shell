@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 
 void getline_inp(char **buffer);
+void env_builtin(char **envp);
 char **tokens(char *buffer);
 char *find_command_path(const char *command);
 
