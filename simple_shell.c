@@ -9,28 +9,30 @@
 char **tokens(char *buffer)
 {
 	int argc = 0, i = 0;
-	char *token;
-	char **argv = NULL;
+	char *copy, *token;
+	char **argv = NULL, *delim = " ";
 
-	token = strtok(buffer, " ");
+	copy = strdup(buffer);
+	token = strtok(buffer, delim);
 
 	while (token)
 	{
-		token = strtok(NULL, " ");
+		token = strtok(NULL, delim);
 		argc++;
 	}
 
 	argv = malloc(sizeof(char *) * (argc + 1));
-	token = strtok(buffer, " ");
+	token = strtok(copy, delim);
 
 	while (token)
 	{
-		argv[i] = token;
-		token = strtok(NULL, " ");
+		argv[i] = strdup(token);
+		token = strtok(NULL, delim);
 		i++;
 	}
 
 	argv[argc] = NULL;
+	free(copy);
 
 	return (argv);
 }
@@ -54,7 +56,7 @@ int main(void)
 	while (1)
 	{
 		/* prints $  to the terminal*/
-		write(STDOUT_FILENO, "NB$ ", 4);
+		write(STDOUT_FILENO, ":)$ ", 4);
 
 		input = getline(&buffer, &buffer_size, stdin);
 		if (input == -1)
@@ -70,30 +72,32 @@ int main(void)
 		
 		args = tokens(buffer);
 
-		pid = fork();
-		if (pid == -1)
+		if(args[0])
 		{
-			perror("Error creating a child process");
-			free(buffer);
-			exit(EXIT_FAILURE);
-		}
-		else if (pid == 0)
-		{
-			printf("Executing command: %s\n", args[0]);
+			pid = fork();
+			if (pid == -1)
+			{
+				perror("Error creating a child process");
+				free(buffer);
+				exit(EXIT_FAILURE);
+			}
+			else if (pid == 0)
+			{
+				execve(args[0], args, NULL);
+				perror("Error executing command");
+				exit(EXIT_FAILURE);
+			}
+			if (waitpid(pid, &status, 0) == -1)
+			{
+				perror("Error while waiting");
+				exit(EXIT_FAILURE);
+			}
 
-			execve(args[0], args, NULL);
-			perror("Error executing command");
-			exit(EXIT_FAILURE);
-		}
-		if (waitpid(pid, &status, 0) == -1)
-		{
-			perror("Error while waiting");
-			exit(EXIT_FAILURE);
-		}
+			for (i = 0; args[i] != NULL; i++)
+				free(args[i]);
 
-		for (i = 0; args[i] != NULL; i++)
-			free(args[i]);
-		free(args);
+			free(args);
+		}
 	}
 
 	free(buffer);
