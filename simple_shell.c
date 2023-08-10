@@ -22,11 +22,21 @@ char **tokens(char *buffer)
 	}
 
 	argv = malloc(sizeof(char *) * (argc + 1));
+	if (!argv)
+	{
+		perror("Memory allocation failed");
+		exit(EXIT_FAILURE);
+	}
 	token = strtok(copy, delim);
 
 	while (token)
 	{
 		argv[i] = strdup(token);
+		if (!argv[i])
+		{
+			perror("Memory allocation failed");
+			exit(EXIT_FAILURE);
+		}
 		token = strtok(NULL, delim);
 		i++;
 	}
@@ -41,65 +51,94 @@ char **tokens(char *buffer)
 /**
  * main - create a custom shell
  *
- * @argc: is the number of items in argv
- * @argv: is a NULL terminated array of strings
- * @env: contains the environment variables
- *
+ * Return: 0 always (Success)
  */
 int main(void)
 {
 	char *buffer = NULL, **args;
-	size_t buffer_size = 0;
-	int input, status, i;
+	int status, i;
 	pid_t pid;
+	char *command_path;
 
 	while (1)
 	{
-		/* prints $  to the terminal*/
 		write(STDOUT_FILENO, ":)$ ", 4);
+		fflush(stdout);
 
-		input = getline(&buffer, &buffer_size, stdin);
-		if (input == -1)
+		getline_inp(&buffer);
+		if (strcmp(buffer, "exit") == 0)
 		{
-			perror("Error in getline");
 			free(buffer);
+			exit(EXIT_SUCCESS);
+		}
+		args = tokens(buffer);
+
+		command_path = find_command_path(args[0]);
+		if (command_path == NULL)
+		{
+			perror("Command not found");
+			free(buffer);
+			free(args);
+			continue;
+		}
+
+		pid = fork();
+		if (pid == -1)
+		{
+			perror("Error creating a child process");
+			free(buffer);
+			free(args);
+			exit(EXIT_FAILURE);
+		}
+		else if (pid == 0)
+		{
+			execve(command_path, args, NULL);
+			perror("Error executing command");
+			exit(EXIT_FAILURE);
+		}
+		if (waitpid(pid, &status, 0) == -1)
+		{
+			perror("Error while waiting");
+			free(buffer);
+			free(args);
 			exit(EXIT_FAILURE);
 		}
 
-		if (buffer[input - 1] == '\n')
-			buffer[input - 1] = '\0';
+		free(command_path);
 
-		
-		args = tokens(buffer);
+		for (i = 0; args[i] != NULL; i++)
+			free(args[i]);
 
-		if(args[0])
-		{
-			pid = fork();
-			if (pid == -1)
-			{
-				perror("Error creating a child process");
-				free(buffer);
-				exit(EXIT_FAILURE);
-			}
-			else if (pid == 0)
-			{
-				execve(args[0], args, NULL);
-				perror("Error executing command");
-				exit(EXIT_FAILURE);
-			}
-			if (waitpid(pid, &status, 0) == -1)
-			{
-				perror("Error while waiting");
-				exit(EXIT_FAILURE);
-			}
-
-			for (i = 0; args[i] != NULL; i++)
-				free(args[i]);
-
-			free(args);
-		}
+		free(args);
 	}
-
 	free(buffer);
 	return (0);
+}
+
+char *find_command_path(const char *command)
+{
+	char *path = getenv("PATH");
+	char *path_copy = strdup(path);
+	char *dir = strtok(path_copy, ":");
+	char *full_path;
+
+	while (dir != NULL)
+	{
+		full_path = (char *)malloc(strlen(dir) + strlen(command) + 2);
+		if (full_path == NULL)
+		{
+			perror("Memory allocation failed");
+			exit(EXIT_FAILURE);
+		}
+		sprintf(full_path, "%s/%s", dir, command);
+		if (access(full_path, X_OK) == 0)
+		{
+			free(path_copy);
+			return full_path;
+		}
+		free(full_path);
+		dir = strtok(NULL, ":");
+	}
+	free(path_copy);
+	return NULL;
 }

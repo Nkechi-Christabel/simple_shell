@@ -8,5 +8,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+void getline_inp(char **buffer);
+char **tokens(char *buffer);
+char *find_command_path(const char *command);
 
 #endif /* SHELL_H */
