@@ -1,27 +1,59 @@
 #include "shell.h"
 
 /**
- * env_builtin - Print the current environment variables
- * @env: Array of environment variables
+ * tokens - Tokenize parameters from stdin
+ * @buffer: where the tokens are stored
+ *
+ * Return: Pointer to tokenized parameters
  */
-void env_builtin(char **env)
+char **tokens(char *buffer)
 {
-	int i = 0;
+	int argc = 0, i = 0;
+	char *copy, *token;
+	char **argv = NULL, *delim = " ";
 
-	while (env[i] != NULL)
+	copy = strdup(buffer);
+	token = strtok(buffer, delim);
+
+	while (token)
 	{
-		printf("%s\n", env[i]);
+		token = strtok(NULL, delim);
+		argc++;
+	}
+
+	argv = malloc(sizeof(char *) * (argc + 1));
+	if (!argv)
+	{
+		perror("Memory allocation failed");
+		exit(EXIT_FAILURE);
+	}
+	token = strtok(copy, delim);
+
+	while (token)
+	{
+		argv[i] = strdup(token);
+		if (!argv[i])
+		{
+			perror("Memory allocation failed");
+			exit(EXIT_FAILURE);
+		}
+		token = strtok(NULL, delim);
 		i++;
-    }
+	}
+
+	argv[argc] = NULL;
+	free(copy);
+
+	return (argv);
 }
+
 
 /**
  * main - create a custom shell
- * @env: The environment variables of the current process
+ *
  * Return: 0 always (Success)
  */
-int main(__attribute__((unused)) int argc, __attribute__((unused))
-		char *argv[], char *envp[])
+int main(void)
 {
 	char *buffer = NULL, **args;
 	int status, i;
@@ -38,9 +70,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 			free(buffer);
 			exit(EXIT_SUCCESS);
 		}
-		else if (strcmp(buffer, "env") == 0)
-			env_builtin(envp);
-
 		args = tokens(buffer);
 		pid = fork();
 		if (pid == -1)
