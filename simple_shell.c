@@ -1,6 +1,42 @@
 #include "shell.h"
 
 /**
+ * tokens - Tokenize parameters from stdin
+ * @buffer: where the tokens are stored
+ *
+ * Return: Pointer to tokenized parameters
+ */
+char **tokens(char *buffer)
+{
+	int argc = 0, i = 0;
+	char *token;
+	char **argv = NULL;
+
+	token = strtok(buffer, " ");
+
+	while (token)
+	{
+		token = strtok(NULL, " ");
+		argc++;
+	}
+
+	argv = malloc(sizeof(char *) * (argc + 1));
+	token = strtok(buffer, " ");
+
+	while (token)
+	{
+		argv[i] = token;
+		token = strtok(NULL, " ");
+		i++;
+	}
+
+	argv[argc] = NULL;
+
+	return (argv);
+}
+
+
+/**
  * main - create a custom shell
  *
  * @argc: is the number of items in argv
@@ -10,20 +46,15 @@
  */
 int main(void)
 {
-	char *buffer = NULL;
+	char *buffer = NULL, **args;
 	size_t buffer_size = 0;
-	int input;
+	int input, status, i;
 	pid_t pid;
-	int status;
-	char *args[1024];
-	char *token;
-	int arg_count = 0;
 
 	while (1)
 	{
-		/*char *token;*/
 		/* prints $  to the terminal*/
-		write(STDOUT_FILENO, "$ ", 2);
+		write(STDOUT_FILENO, "NB$ ", 4);
 
 		input = getline(&buffer, &buffer_size, stdin);
 		if (input == -1)
@@ -36,14 +67,8 @@ int main(void)
 		if (buffer[input - 1] == '\n')
 			buffer[input - 1] = '\0';
 
-		token = strtok(buffer, " ");
-		while (token != NULL && arg_count < 1023)
-		{
-			args[arg_count] = token;
-			arg_count++;
-			token = strtok(NULL, " ");
-		}
-		args[arg_count] = NULL;
+		
+		args = tokens(buffer);
 
 		pid = fork();
 		if (pid == -1)
@@ -54,6 +79,8 @@ int main(void)
 		}
 		else if (pid == 0)
 		{
+			printf("Executing command: %s\n", args[0]);
+
 			execve(args[0], args, NULL);
 			perror("Error executing command");
 			exit(EXIT_FAILURE);
@@ -63,6 +90,10 @@ int main(void)
 			perror("Error while waiting");
 			exit(EXIT_FAILURE);
 		}
+
+		for (i = 0; args[i] != NULL; i++)
+			free(args[i]);
+		free(args);
 	}
 
 	free(buffer);
