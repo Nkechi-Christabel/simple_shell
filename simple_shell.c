@@ -41,65 +41,43 @@ char **tokens(char *buffer)
 /**
  * main - create a custom shell
  *
- * @argc: is the number of items in argv
- * @argv: is a NULL terminated array of strings
- * @env: contains the environment variables
- *
+ * Return: 0 always (Success)
  */
 int main(void)
 {
 	char *buffer = NULL, **args;
 	size_t buffer_size = 0;
-	int input, status, i;
+	int status, i;
 	pid_t pid;
 
 	while (1)
 	{
-		/* prints $  to the terminal*/
 		write(STDOUT_FILENO, ":)$ ", 4);
+		getline_inp(buffer, &buffer_size);
 
-		input = getline(&buffer, &buffer_size, stdin);
-		if (input == -1)
+		args = tokens(buffer);
+		pid = fork();
+		if (pid == -1)
 		{
-			perror("Error in getline");
+			perror("Error creating a child process");
 			free(buffer);
 			exit(EXIT_FAILURE);
 		}
-
-		if (buffer[input - 1] == '\n')
-			buffer[input - 1] = '\0';
-
-		
-		args = tokens(buffer);
-
-		if(args[0])
+		else if (pid == 0)
 		{
-			pid = fork();
-			if (pid == -1)
-			{
-				perror("Error creating a child process");
-				free(buffer);
-				exit(EXIT_FAILURE);
-			}
-			else if (pid == 0)
-			{
-				execve(args[0], args, NULL);
-				perror("Error executing command");
-				exit(EXIT_FAILURE);
-			}
-			if (waitpid(pid, &status, 0) == -1)
-			{
-				perror("Error while waiting");
-				exit(EXIT_FAILURE);
-			}
-
-			for (i = 0; args[i] != NULL; i++)
-				free(args[i]);
-
-			free(args);
+			execve(args[0], args, NULL);
+			perror("Error executing command");
+			exit(EXIT_FAILURE);
 		}
+		if (waitpid(pid, &status, 0) == -1)
+		{
+			perror("Error while waiting");
+			exit(EXIT_FAILURE);
+		}
+		for (i = 0; args[i] != NULL; i++)
+			free(args[i]);
+		free(args);
 	}
-
 	free(buffer);
 	return (0);
 }

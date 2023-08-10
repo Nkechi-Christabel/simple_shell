@@ -8,5 +8,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+void getline_inp(char *buffer, size_t *buffer_size);
 
 #endif /* SHELL_H */
