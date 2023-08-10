@@ -21,6 +21,7 @@ int main(void)
 
 	while (1)
 	{
+		/*char *token;*/
 		/* prints $  to the terminal*/
 		write(STDOUT_FILENO, "$ ", 2);
 
