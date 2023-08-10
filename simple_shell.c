@@ -7,12 +7,15 @@
 void env_builtin(char **env)
 {
 	int i = 0;
+	size_t len;
 
 	while (env[i] != NULL)
 	{
-		printf("%s\n", env[i]);
+		len = strlen(env[i]);
+		write(STDOUT_FILENO, env[i], len);
+		write(STDOUT_FILENO, "\n", 1);
 		i++;
-    }
+	}
 }
 
 /**
@@ -38,9 +41,11 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 			free(buffer);
 			exit(EXIT_SUCCESS);
 		}
-		else if (strcmp(buffer, "env") == 0)
+		if (strcmp(buffer, "env") == 0)
+		{
 			env_builtin(envp);
-
+			continue;
+		}
 		args = tokens(buffer);
 		pid = fork();
 		if (pid == -1)
