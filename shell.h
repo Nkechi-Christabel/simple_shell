@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-void getline_inp(char *buffer, size_t *buffer_size);
+void getline_inp(char **buffer);
+char **tokens(char *buffer);
 
 #endif /* SHELL_H */

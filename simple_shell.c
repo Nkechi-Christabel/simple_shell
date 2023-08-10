@@ -22,11 +22,21 @@ char **tokens(char *buffer)
 	}
 
 	argv = malloc(sizeof(char *) * (argc + 1));
+	if (!argv)
+	{
+		perror("Memory allocation failed");
+		exit(EXIT_FAILURE);
+	}
 	token = strtok(copy, delim);
 
 	while (token)
 	{
 		argv[i] = strdup(token);
+		if (!argv[i])
+		{
+			perror("Memory allocation failed");
+			exit(EXIT_FAILURE);
+		}
 		token = strtok(NULL, delim);
 		i++;
 	}
@@ -46,15 +56,20 @@ char **tokens(char *buffer)
 int main(void)
 {
 	char *buffer = NULL, **args;
-	size_t buffer_size = 0;
 	int status, i;
 	pid_t pid;
 
 	while (1)
 	{
 		write(STDOUT_FILENO, ":)$ ", 4);
-		getline_inp(buffer, &buffer_size);
+		fflush(stdout);
 
+		getline_inp(&buffer);
+		if (strcmp(buffer, "exit") == 0)
+		{
+			free(buffer);
+			exit(EXIT_SUCCESS);
+		}
 		args = tokens(buffer);
 		pid = fork();
 		if (pid == -1)

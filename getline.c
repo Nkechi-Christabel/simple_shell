@@ -6,18 +6,19 @@
  * @buffer_size: Size of the buffer
  */
 
-void getline_inp(char *buffer, size_t *buffer_size)
+void getline_inp(char **buffer)
 {
-	ssize_t input;
+	int input;
+	size_t buffer_size = 0;
 
-	input = getline(&buffer, buffer_size, stdin);
-		if (input == -1)
-		{
-			perror("Error in getline");
-			free(buffer);
-			exit(EXIT_FAILURE);
-		}
+	input = getline(buffer, &buffer_size, stdin);
+	if (input == -1)
+	{
+		perror("Error in getline");
+		exit(EXIT_FAILURE);
+	}
 
-		if (buffer[input - 1] == '\n')
-			buffer[input - 1] = '\0';
+	if ((*buffer)[input - 1] == '\n')
+		(*buffer)[input - 1] = '\0';
+
 }
