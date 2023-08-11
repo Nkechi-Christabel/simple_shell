@@ -12,7 +12,7 @@
 
 void getline_inp(char **buffer);
 void env_builtin(char *buffer, char **envp);
-char **tokens(char *buffer);
+char **tokens(char *buffer, char *delim);
 char *find_command_path(const char *cmd);
 void exit_func(char *buffer);
 void call_fork(char *buffer, char **args, char *command_path);
