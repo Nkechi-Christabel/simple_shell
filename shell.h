@@ -10,6 +10,8 @@
 
 #define BUFFER_SIZE 1024
 
+extern char **environ;
+
 void getline_inp(char **buffer);
 void env_builtin(char *buffer, char **envp);
 char **tokens(char *buffer);

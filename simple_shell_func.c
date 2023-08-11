@@ -48,10 +48,27 @@ void env_builtin(char *buffer, char **envp)
  */
 char *find_command_path(const char *cmd)
 {
-	char *path = getenv("PATH");
-	char *path_copy = strdup(path);
-	char *dir = strtok(path_copy, ":");
+	char *path = NULL;
+	char **env = environ;
+	char *path_copy;
+	char *dir;
 	char *full_path, *abs_path;
+
+	for (; *env != NULL; env++)
+	{
+		if (strncmp(*env, "PATH=", 5) == 0)
+		{
+			path = *env + 5;
+			break;
+		}
+	}
+	if (path == NULL)
+	{
+		perror("PATH environment variable not found");
+		return NULL;
+	}
+	path_copy = strdup(path);
+	dir = strtok(path_copy, ":");
 
 	if (access(cmd, X_OK) == 0)
 	{
@@ -73,7 +90,9 @@ char *find_command_path(const char *cmd)
 			perror("Memory allocation failed");
 			exit(EXIT_FAILURE);
 		}
-		sprintf(full_path, "%s/%s", dir, cmd);
+		strcpy(full_path, dir);
+		strcat(full_path, "/");
+		strcat(full_path, cmd);
 		if (access(full_path, X_OK) == 0)
 		{
 			free(path_copy);
