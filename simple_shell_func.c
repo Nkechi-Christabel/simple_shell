@@ -8,10 +8,15 @@
  */
 void exit_func(char *buffer)
 {
-	if (strcmp(buffer, "exit") == 0)
+	if (strncmp(buffer, "exit", 4) == 0)
 	{
+		int status;
+		char *arg = buffer + 4;
+
+		status = atoi(arg);
+
 		free(buffer);
-		exit(EXIT_SUCCESS);
+		exit(status);
 	}
 }
 
@@ -65,7 +70,7 @@ char *find_command_path(const char *cmd)
 	if (path == NULL)
 	{
 		perror("PATH environment variable not found");
-		return NULL;
+		return (NULL);
 	}
 	path_copy = strdup(path);
 	dir = strtok(path_copy, ":");
