@@ -15,9 +15,10 @@ extern char **environ;
 void getline_inp(char **buffer);
 void env_builtin(char *buffer, char **envp);
 char **tokens(char *buffer);
-char *find_command_path(const char *cmd);
+char *find_path(const char *cmd);
 void exit_func(char *buffer);
 void call_fork(char *buffer, char **args, char *command_path);
 ssize_t _getline(char **lineptr, size_t *n, FILE *stream);
+char *_strtok(char *str, const char *delim);
 
 #endif /* SHELL_H */

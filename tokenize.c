@@ -10,13 +10,12 @@
 char *_strtok(char *str, const char *delim)
 {
 	char *start, *end;
-
 	static char *token = NULL;
 
-		if (str != NULL)
-			token = str;
-		else if (token == NULL)
-			return NULL;
+	if (str != NULL)
+		token = str;
+	else if (token == NULL)
+		return NULL;
 
 	start = token;
 	end = strpbrk(start, delim);
