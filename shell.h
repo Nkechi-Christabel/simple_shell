@@ -8,9 +8,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#define BUFFER_SIZE 1024
+
 void getline_inp(char **buffer);
-void env_builtin(char **envp);
+void env_builtin(char *buffer, char **envp);
 char **tokens(char *buffer);
 char *find_command_path(const char *command);
+void exit_func(char *buffer);
+void call_fork(char *buffer, char **args, char *command_path);
+ssize_t _getline(char **lineptr, size_t *n, FILE *stream);
 
 #endif /* SHELL_H */
