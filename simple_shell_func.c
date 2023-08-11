@@ -8,10 +8,15 @@
  */
 void exit_func(char *buffer)
 {
-	if (strcmp(buffer, "exit") == 0)
+	if (strncmp(buffer, "exit", 4) == 0)
 	{
+		int status;
+		char *arg = buffer + 4;
+
+		status = atoi(arg);
+
 		free(buffer);
-		exit(EXIT_SUCCESS);
+		exit(status);
 	}
 }
 
