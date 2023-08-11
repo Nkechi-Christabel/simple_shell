@@ -43,17 +43,14 @@ void env_builtin(char *buffer, char **envp)
 	}
 }
 
-
 /**
- * find_path - finds the command in path
+ * find_path_env - finds the PATH environment variable
  *
- * @cmd: command to search for
- *
- * Return: full_path
+ * Return: path or NULL if not found
  */
-char *find_path(const char *cmd)
+char *find_path_env(void)
 {
-	char *path = NULL, *path_copy, *dir, *full_path, *abs_path;
+	char *path = NULL;
 	char **env = environ;
 
 	for (; *env != NULL; env++)
@@ -69,9 +66,27 @@ char *find_path(const char *cmd)
 		perror("PATH environment variable not found");
 		return (NULL);
 	}
+	return (strdup(path));
+}
+
+
+/**
+ * find_executable_path - finds the full executable path for a command
+ *
+ * @cmd: command to search for
+ *
+ * Return: full_path or NULL if not found
+ */
+char *find_executable_path(const char *cmd)
+{
+	char *path_copy, *dir, *full_path, *abs_path;
+	char *path = find_path_env();
+
+	if (path == NULL)
+		return (NULL);
+
 	path_copy = strdup(path);
 	dir = _strtok(path_copy, ":");
-
 	if (access(cmd, X_OK) == 0)
 	{
 		abs_path = strdup(cmd);
@@ -80,6 +95,7 @@ char *find_path(const char *cmd)
 			perror("Memory allocation failed");
 			exit(EXIT_FAILURE);
 		}
+		free(path_copy);
 		return (abs_path);
 	}
 	while (dir != NULL)
@@ -104,3 +120,4 @@ char *find_path(const char *cmd)
 	free(path_copy);
 	return (NULL);
 }
+
