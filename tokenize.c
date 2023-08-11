@@ -8,9 +8,9 @@
  *
  * Return: Pointer to tokenized parameters
  */
-char **tokens(char *buffer)
+char **tokens(char *buffer, char *delim)
 {
-	char *copy, **argv = NULL, *delim = " ";
+	char *copy, **argv = NULL;
 	int argc = count_tokens(buffer, delim);
 	int i = 0, j, token_start, token_length;
 
