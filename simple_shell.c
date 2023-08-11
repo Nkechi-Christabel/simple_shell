@@ -4,6 +4,8 @@
 /**
  * main - create a custom shell
  * @envp: Array of environment variables
+ * @argc: is the number of items in argv
+ * @argv: is a NULL terminated array of strings
  *
  * Return: 0 always (Success)
  */
@@ -14,25 +16,19 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 	int status, i;
 	pid_t pid;
 	char *command_path;
+	int pipe = 1;
 
-	while (1)
+	while (1 && pipe)
 	{
+		if (isatty(STDIN_FILENO) == 0)
+			pipe = 0;
+
 		write(STDOUT_FILENO, ":)$ ", 4);
 		fflush(stdout);
 
 		getline_inp(&buffer);
-		if (strcmp(buffer, "exit") == 0)
-		{
-			free(buffer);
-			exit(EXIT_SUCCESS);
-		}
-
-		if (strcmp(buffer, "env") == 0)
-		{
-			env_builtin(envp);
-			continue;
-		}
-
+		exit_func(buffer);
+		env_builtin(buffer, envp);
 		args = tokens(buffer);
 
 		command_path = find_command_path(args[0]);
@@ -70,7 +66,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 
 		for (i = 0; args[i] != NULL; i++)
 			free(args[i]);
-
 		free(args);
 	}
 	free(buffer);
