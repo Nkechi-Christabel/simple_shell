@@ -18,6 +18,7 @@ void exit_func(char *buffer)
 /**
  * env_builtin - Print the current environment variables
  * @envp: Array of environment variables
+ * @buffer: contains the command
  */
 void env_builtin(char *buffer, char **envp)
 {
