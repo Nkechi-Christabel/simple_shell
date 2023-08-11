@@ -1,67 +1,28 @@
 #include "shell.h"
 
-/**
- * tokens - Tokenize parameters from stdin
- * @buffer: where the tokens are stored
- *
- * Return: Pointer to tokenized parameters
- */
-char **tokens(char *buffer)
-{
-	int argc = 0, i = 0;
-	char *copy, *token;
-	char **argv = NULL, *delim = " ";
-
-	copy = strdup(buffer);
-	token = strtok(buffer, delim);
-
-	while (token)
-	{
-		token = strtok(NULL, delim);
-		argc++;
-	}
-
-	argv = malloc(sizeof(char *) * (argc + 1));
-	if (!argv)
-	{
-		perror("Memory allocation failed");
-		exit(EXIT_FAILURE);
-	}
-	token = strtok(copy, delim);
-
-	while (token)
-	{
-		argv[i] = strdup(token);
-		if (!argv[i])
-		{
-			perror("Memory allocation failed");
-			exit(EXIT_FAILURE);
-		}
-		token = strtok(NULL, delim);
-		i++;
-	}
-
-	argv[argc] = NULL;
-	free(copy);
-
-	return (argv);
-}
-
 
 /**
  * main - create a custom shell
+ * @envp: Array of environment variables
+ * @argc: is the number of items in argv
+ * @argv: is a NULL terminated array of strings
  *
  * Return: 0 always (Success)
  */
-int main(void)
+int main(__attribute__((unused)) int argc, __attribute__((unused))
+		char *argv[], char *envp[])
 {
 	char *buffer = NULL, **args;
 	int status, i;
 	pid_t pid;
 	char *command_path;
+	int pipe = 1;
 
-	while (1)
+	while (1 && pipe)
 	{
+		if (isatty(STDIN_FILENO) == 0)
+			pipe = 0;
+
 		write(STDOUT_FILENO, ":)$ ", 4);
 		fflush(stdout);
 
@@ -71,6 +32,13 @@ int main(void)
 			free(buffer);
 			exit(EXIT_SUCCESS);
 		}
+
+		if (strcmp(buffer, "env") == 0)
+		{
+			env_builtin(envp);
+			continue;
+		}
+
 		args = tokens(buffer);
 
 		command_path = find_command_path(args[0]);
@@ -113,32 +81,4 @@ int main(void)
 	}
 	free(buffer);
 	return (0);
-}
-
-char *find_command_path(const char *command)
-{
-	char *path = getenv("PATH");
-	char *path_copy = strdup(path);
-	char *dir = strtok(path_copy, ":");
-	char *full_path;
-
-	while (dir != NULL)
-	{
-		full_path = (char *)malloc(strlen(dir) + strlen(command) + 2);
-		if (full_path == NULL)
-		{
-			perror("Memory allocation failed");
-			exit(EXIT_FAILURE);
-		}
-		sprintf(full_path, "%s/%s", dir, command);
-		if (access(full_path, X_OK) == 0)
-		{
-			free(path_copy);
-			return full_path;
-		}
-		free(full_path);
-		dir = strtok(NULL, ":");
-	}
-	free(path_copy);
-	return NULL;
 }

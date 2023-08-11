@@ -3,7 +3,7 @@
 /**
  * getline_inp - Gets command lines from standard input
  * @buffer: Where inputs are stored
- * @buffer_size: Size of the buffer
+ *
  */
 
 void getline_inp(char **buffer)
