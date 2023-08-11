@@ -1,6 +1,5 @@
 #include "shell.h"
 
-#define BUFFER_SIZE 1024
 
 /**
  * tokens - Tokenize parameters from stdin
