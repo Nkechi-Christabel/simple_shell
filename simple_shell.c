@@ -1,6 +1,5 @@
 #include "shell.h"
 
-
 /**
  * main - create a custom shell
  * @envp: Array of environment variables
