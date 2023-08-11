@@ -1,21 +1,39 @@
 #include "shell.h"
 
+/**
+ * exit_func - exit the shell when exit is passed
+ *
+ * @buffer: contains the command
+ *
+ */
+void exit_func(char *buffer)
+{
+	if (strcmp(buffer, "exit") == 0)
+	{
+		free(buffer);
+		exit(EXIT_SUCCESS);
+	}
+}
 
 /**
  * env_builtin - Print the current environment variables
  * @envp: Array of environment variables
  */
-void env_builtin(char **envp)
+void env_builtin(char *buffer, char **envp)
 {
 	int i = 0;
+	size_t len;
 
-	while (envp[i] != NULL)
+	if (strcmp(buffer, "env") == 0)
 	{
-		size_t len = strlen(envp[i]);
+		while (envp[i] != NULL)
+		{
+			len = strlen(envp[i]);
 
-		write(STDOUT_FILENO, envp[i], len);
-		write(STDOUT_FILENO, "\n", 1);
-		i++;
+			write(STDOUT_FILENO, envp[i], len);
+			write(STDOUT_FILENO, "\n", 1);
+			i++;
+		}
 	}
 }
 

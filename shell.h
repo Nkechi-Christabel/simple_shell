@@ -9,8 +9,9 @@
 #include <sys/wait.h>
 
 void getline_inp(char **buffer);
-void env_builtin(char **envp);
+void env_builtin(char *buffer, char **envp);
 char **tokens(char *buffer);
 char *find_command_path(const char *command);
+void exit_func(char *buffer);
 
 #endif /* SHELL_H */

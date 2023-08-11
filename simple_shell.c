@@ -27,18 +27,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 		fflush(stdout);
 
 		getline_inp(&buffer);
-		if (strcmp(buffer, "exit") == 0)
-		{
-			free(buffer);
-			exit(EXIT_SUCCESS);
-		}
-
-		if (strcmp(buffer, "env") == 0)
-		{
-			env_builtin(envp);
-			continue;
-		}
-
+		exit_func(buffer);
+		env_builtin(buffer, envp);
 		args = tokens(buffer);
 
 		command_path = find_command_path(args[0]);
@@ -76,7 +66,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 
 		for (i = 0; args[i] != NULL; i++)
 			free(args[i]);
-
 		free(args);
 	}
 	free(buffer);
