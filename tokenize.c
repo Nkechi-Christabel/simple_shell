@@ -1,5 +1,36 @@
 #include "shell.h"
 
+/**
+ * _strtok - Acts like strtok function by breaking strings into word
+ * @str: The string to tokenize
+ * @delim: The delimiter or separator
+ *
+ * Return: Each 
+ */
+char *_strtok(char *str, const char *delim)
+{
+	char *start, *end;
+
+	static char *token = NULL;
+
+		if (str != NULL)
+			token = str;
+		else if (token == NULL)
+			return NULL;
+
+	start = token;
+	end = strpbrk(start, delim);
+
+	if (end != NULL)
+	{
+		*end = '\0';
+		token = end + 1;
+	}
+	else
+		token = NULL;
+
+	return start;
+}
 
 /**
  * tokens - Tokenize parameters from stdin
@@ -7,84 +38,43 @@
  *
  * Return: Pointer to tokenized parameters
  */
-char **tokens(char *buffer, char *delim)
+char **tokens(char *buffer)
 {
-	char *copy, **argv = NULL;
-	int argc = count_tokens(buffer, delim);
-	int i = 0, j, token_start, token_length;
+	int argc = 0, i = 0;
+	char *copy, *token, **argv = NULL, *delim = " ";
 
 	copy = strdup(buffer);
+	token = _strtok(buffer, delim);
+
+	while (token)
+	{
+		token = _strtok(NULL, delim);
+		argc++;
+	}
 
 	argv = malloc(sizeof(char *) * (argc + 1));
-
 	if (!argv)
 	{
 		perror("Memory allocation failed");
 		exit(EXIT_FAILURE);
 	}
+	token = _strtok(copy, delim);
 
-	for (j = 0; j < argc; j++)
+	while (token)
 	{
-		while (copy[i] && strchr(delim, copy[i]) != NULL)
-			i++;
-
-		token_start = i;
-
-		while (copy[i] && strchr(delim, copy[i]) == NULL)
-			i++;
-
-		token_length = i - token_start;
-		argv[j] = malloc(token_length + 1);
-
-		if (!argv[j])
+		argv[i] = strdup(token);
+		if (!argv[i])
 		{
 			perror("Memory allocation failed");
 			exit(EXIT_FAILURE);
 		}
-
-		strncpy(argv[j], copy + token_start, token_length);
-		argv[j][token_length] = '\0';
+		token = _strtok(NULL, delim);
+		i++;
 	}
 
 	argv[argc] = NULL;
 	free(copy);
 
-	return argv;
+	return (argv);
 }
 
-
-/**
- * count_tokens - Count the number of tokens in a buffer
- * @buffer: Input buffer
- * @delim: Delimiter string
- *
- * Return: Number of tokens
- */
-int count_tokens(char *buffer, char *delim)
-{
-	int count = 0, i;
-	int in_token = 0;
-
-	for (i = 0; buffer[i] != '\0'; i++)
-	{
-		if (strchr(delim, buffer[i]) != NULL)
-		{
-			if (in_token)
-			{
-				in_token = 0;
-				count++;
-			}
-		}
-
-		else
-		{
-			if (!in_token)
-				in_token = 1;
-		}
-	}
-
-	if (in_token)
-		count++;
-
-	return (count);
-}
