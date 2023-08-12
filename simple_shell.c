@@ -25,6 +25,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 		getline_inp(&buffer);
 		exit_func(buffer);
 		env_builtin(buffer, envp);
+		setenv_builtin(buffer, &envp);
+		unsetenv_builtin(buffer, &envp);
 		args = tokens(buffer);
 
 		command_path = find_executable_path(args[0]);
