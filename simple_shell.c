@@ -22,7 +22,11 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 		write(STDOUT_FILENO, ":)$ ", 4);
 		fflush(stdout);
 
-		getline_inp(&buffer);
+		if (getline_inp(&buffer) == -1)
+		{
+			write(STDOUT_FILENO, "\n", 2);
+			break;
+		}
 		exit_func(buffer);
 		env_builtin(buffer, envp);
 		args = tokens(buffer);
