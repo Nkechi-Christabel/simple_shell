@@ -29,24 +29,29 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 		}
 		exit_func(buffer);
 		env_builtin(buffer, envp);
-		setenv_builtin(buffer, &envp);
-		unsetenv_builtin(buffer, &envp);
-		args = tokens(buffer);
 
-		command_path = find_executable_path(args[0]);
-		if (command_path == NULL)
+		if (strncmp(buffer, "setenv", 6) == 0)
+			setenv_builtin(buffer, &envp);
+		else if (strncmp(buffer, "unsetenv", 8) == 0)
+			unsetenv_builtin(buffer, &envp);
+		else
 		{
-			perror("Command not found");
-			free(buffer);
+			args = tokens(buffer);
+			command_path = find_executable_path(args[0]);
+			if (command_path == NULL)
+			{
+				perror("Command not found");
+				free(buffer);
+				free(args);
+				continue;
+			}
+			call_fork(buffer, args, command_path);
+			free(command_path);
+			for (i = 0; args[i] != NULL; i++)
+				free(args[i]);
 			free(args);
-			continue;
 		}
-		call_fork(buffer, args, command_path);
-		free(command_path);
 
-		for (i = 0; args[i] != NULL; i++)
-			free(args[i]);
-		free(args);
 	}
 	free(buffer);
 	return (0);
