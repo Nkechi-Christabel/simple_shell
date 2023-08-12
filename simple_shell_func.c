@@ -8,10 +8,15 @@
  */
 void exit_func(char *buffer)
 {
-	if (strcmp(buffer, "exit") == 0)
+	if (strncmp(buffer, "exit", 4) == 0)
 	{
+		int status;
+		char *arg = buffer + 4;
+
+		status = atoi(arg);
+
 		free(buffer);
-		exit(EXIT_SUCCESS);
+		exit(status);
 	}
 }
 
@@ -39,95 +44,80 @@ void env_builtin(char *buffer, char **envp)
 }
 
 /**
- * tokens - Tokenize parameters from stdin
- * @buffer: where the tokens are stored
+ * find_path_env - finds the PATH environment variable
  *
- * Return: Pointer to tokenized parameters
+ * Return: path or NULL if not found
  */
-char **tokens(char *buffer)
+char *find_path_env(void)
 {
-	int argc = 0, i = 0;
-	char *copy, *token;
-	char **argv = NULL, *delim = " ";
+	char *path = NULL;
+	char **env = environ;
 
-	copy = strdup(buffer);
-	token = strtok(buffer, delim);
-
-	while (token)
+	for (; *env != NULL; env++)
 	{
-		token = strtok(NULL, delim);
-		argc++;
-	}
-
-	argv = malloc(sizeof(char *) * (argc + 1));
-	if (!argv)
-	{
-		perror("Memory allocation failed");
-		exit(EXIT_FAILURE);
-	}
-	token = strtok(copy, delim);
-
-	while (token)
-	{
-		argv[i] = strdup(token);
-		if (!argv[i])
+		if (strncmp(*env, "PATH=", 5) == 0)
 		{
-			perror("Memory allocation failed");
-			exit(EXIT_FAILURE);
+			path = *env + 5;
+			break;
 		}
-		token = strtok(NULL, delim);
-		i++;
 	}
-
-	argv[argc] = NULL;
-	free(copy);
-
-	return (argv);
+	if (path == NULL)
+	{
+		perror("PATH environment variable not found");
+		return (NULL);
+	}
+	return (strdup(path));
 }
 
-/**
- * find_command_path - finds the command in path
- *
- * @command: command to search for
- *
- * Return: full_path
- */
-char *find_command_path(const char *command)
-{
-	char *path = getenv("PATH");
-	char *path_copy = strdup(path);
-	char *dir = strtok(path_copy, ":");
-	char *full_path, *abs_path;
 
-	if (access(command, X_OK) == 0)
+/**
+ * find_executable_path - finds the full executable path for a command
+ *
+ * @cmd: command to search for
+ *
+ * Return: full_path or NULL if not found
+ */
+char *find_executable_path(const char *cmd)
+{
+	char *path_copy, *dir, *full_path, *abs_path;
+	char *path = find_path_env();
+
+	if (path == NULL)
+		return (NULL);
+
+	path_copy = strdup(path);
+	dir = _strtok(path_copy, ":");
+	if (access(cmd, X_OK) == 0)
 	{
-		abs_path = strdup(command);
+		abs_path = strdup(cmd);
 		if (abs_path == NULL)
 		{
 			perror("Memory allocation failed");
 			exit(EXIT_FAILURE);
 		}
+		free(path_copy);
 		return (abs_path);
 	}
-
 	while (dir != NULL)
 	{
-		full_path = (char *)malloc(strlen(dir) + strlen(command) + 2);
-
+		full_path = (char *)malloc(strlen(dir) + strlen(cmd) + 2);
 		if (full_path == NULL)
 		{
 			perror("Memory allocation failed");
 			exit(EXIT_FAILURE);
 		}
-		sprintf(full_path, "%s/%s", dir, command);
+		strcpy(full_path, dir);
+		strcat(full_path, "/");
+		strcat(full_path, cmd);
 		if (access(full_path, X_OK) == 0)
 		{
 			free(path_copy);
 			return (full_path);
 		}
 		free(full_path);
-		dir = strtok(NULL, ":");
+		dir = _strtok(NULL, ":");
 	}
 	free(path_copy);
 	return (NULL);
 }
+

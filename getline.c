@@ -6,20 +6,21 @@
  *
  */
 
-void getline_inp(char **buffer)
+ssize_t getline_inp(char **buffer)
 {
-	int input;
+	ssize_t input;
 	size_t buffer_size = 0;
 
 	input = _getline(buffer, &buffer_size, stdin);
 	if (input == -1)
 	{
-		perror("Error in getline");
-		exit(EXIT_FAILURE);
+		return -1;
 	}
 
 	if ((*buffer)[input - 1] == '\n')
 		(*buffer)[input - 1] = '\0';
+
+	return input;
 
 }
 
