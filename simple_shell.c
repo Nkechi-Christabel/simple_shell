@@ -1,6 +1,5 @@
 #include "shell.h"
 
-
 /**
  * main - create a custom shell
  * @envp: Array of environment variables
@@ -23,12 +22,16 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 		write(STDOUT_FILENO, ":)$ ", 4);
 		fflush(stdout);
 
-		getline_inp(&buffer);
+		if (getline_inp(&buffer) == -1)
+		{
+			write(STDOUT_FILENO, "\n", 2);
+			break;
+		}
 		exit_func(buffer);
 		env_builtin(buffer, envp);
 		args = tokens(buffer);
 
-		command_path = find_command_path(args[0]);
+		command_path = find_executable_path(args[0]);
 		if (command_path == NULL)
 		{
 			perror("Command not found");
