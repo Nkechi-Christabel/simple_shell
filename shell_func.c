@@ -121,6 +121,11 @@ char *find_executable_path(const char *cmd)
 	return (NULL);
 }
 
+/**
+ * cd_builtin - Handles the "cd" command
+ * @buffer: Input buffer to extract command and argument
+ * @current_dir: The current directory
+ */
 void cd_builtin(char *buffer, char **current_dir)
 {
 	char *token, *dir, *new_dir = NULL;
