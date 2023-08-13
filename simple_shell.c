@@ -1,4 +1,5 @@
 #include "shell.h"
+
 /**
  * handle_exec - is a helper function to main
  *
@@ -29,44 +30,47 @@ void handle_exec(char *buffer)
 }
 /**
  * handle_input - Handles user input and processing commands
+ * @buffer: contains the input
  * @current_dir: Current directory
  * @envp: Array of environment variable
  * Return: 0
  */
 
-int handle_input(char *current_dir, char *envp[])
+int handle_input(char *buffer, char *current_dir, char *envp[])
 {
-	char *buffer = NULL;
-	int pipe = 1;
+	char *command, *trim_cmd;
+	size_t len;
 
-	while (1 && pipe)
+
+	command = strtok(buffer, ";");
+	while (command != NULL)
 	{
-		if (isatty(STDIN_FILENO) == 0)
-			pipe = 0;
-
-		write(STDOUT_FILENO, ":)$ ", 4);
-		fflush(stdout);
-
-		if (getline_inp(&buffer) == -1)
+		trim_cmd = command;
+		while (*trim_cmd == ' ' || *trim_cmd == '\t' || *trim_cmd == '\n')
+			trim_cmd++;
+		len = strlen(trim_cmd);
+		while (len > 0 && (trim_cmd[len - 1] == ' ' ||
+			trim_cmd[len - 1] == '\t' || trim_cmd[len - 1] == '\n'))
 		{
-			write(STDOUT_FILENO, "\n", 2);
-			break;
+			trim_cmd[len - 1] = '\0';
+			len--;
 		}
-		exit_func(buffer);
-		env_builtin(buffer, envp);
-
-		if (strncmp(buffer, "setenv", 6) == 0)
-			setenv_builtin(buffer, &envp);
-		else if (strncmp(buffer, "unsetenv", 8) == 0)
-			unsetenv_builtin(buffer, &envp);
-		else if (strncmp(buffer, "cd", 2) == 0)
-			cd_builtin(buffer, &current_dir);
-		else
+		if (len > 0)
 		{
-			handle_exec(buffer);
+			exit_func(trim_cmd);
+			env_builtin(trim_cmd, envp);
+
+			if (strncmp(trim_cmd, "setenv", 6) == 0)
+				setenv_builtin(trim_cmd, &envp);
+			else if (strncmp(trim_cmd, "unsetenv", 8) == 0)
+				unsetenv_builtin(trim_cmd, &envp);
+			else if (strncmp(trim_cmd, "cd", 2) == 0)
+				cd_builtin(trim_cmd, &current_dir);
+			else
+				handle_exec(trim_cmd);
 		}
+		command = strtok(NULL, ";");
 	}
-	free(buffer);
 	return (0);
 }
 
@@ -82,6 +86,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 		char *argv[], char *envp[])
 {
 	char *home_dir = "/home/username", *current_dir = NULL;
+	char *buffer = NULL;
+	int pipe = 1;
 
 	current_dir = strdup(home_dir);
 	current_dir = strdup(home_dir);
@@ -92,8 +98,20 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 		exit(EXIT_FAILURE);
 	}
 
-	handle_input(current_dir, envp);
-
+	while (1 && pipe)
+	{
+		if (isatty(STDIN_FILENO) == 0)
+			pipe = 0;
+		write(STDOUT_FILENO, ":)$ ", 4);
+		fflush(stdout);
+		if (getline_inp(&buffer) == -1)
+		{
+			write(STDOUT_FILENO, "\n", 2);
+			break;
+		}
+		handle_input(buffer, current_dir, envp);
+	}
+	free(buffer);
 	free(current_dir);
 	return (0);
 }
