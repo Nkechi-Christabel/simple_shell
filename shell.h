@@ -21,5 +21,8 @@ ssize_t _getline(char **lineptr, size_t *n, FILE *stream);
 char *_strtok(char *str, const char *delim);
 char *find_path_env(void);
 char *find_executable_path(const char *cmd);
+void setenv_builtin(char *buffer, char ***envp);
+void unsetenv_builtin(char *buffer, char ***envp);
+void cd_builtin(char *buffer, char **current_dir);
 
 #endif /* SHELL_H */

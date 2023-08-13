@@ -121,3 +121,46 @@ char *find_executable_path(const char *cmd)
 	return (NULL);
 }
 
+/**
+ * cd_builtin - Handles the "cd" command
+ * @buffer: Input buffer to extract command and argument
+ * @current_dir: The current directory
+ */
+void cd_builtin(char *buffer, char **current_dir)
+{
+	char *token, *dir, *new_dir = NULL;
+	size_t max_len = 1024;
+
+	new_dir = (char *)malloc(max_len);
+
+	if (new_dir == NULL)
+	{
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
+
+	token = _strtok(buffer, " ");
+	token = _strtok(NULL, " ");
+
+	if (token == NULL || token[0] == '\0' || strcmp(token, "-") == 0)
+		dir = *current_dir;
+	else
+		dir = token;
+
+	if (chdir(dir) == -1)
+	{
+		perror("cd");
+		free(new_dir);
+		return;
+	}
+
+	if (getcwd(new_dir, max_len) == NULL)
+	{
+		perror("getcwd");
+		free(new_dir);
+		return;
+	}
+
+	free(*current_dir);
+	*current_dir = new_dir;
+}
