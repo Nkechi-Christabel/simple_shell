@@ -89,20 +89,17 @@ void unsetenv_builtin(char *buffer, char ***envp)
 {
 	char *token;
 
-	if (strncmp(buffer, "unsetenv", 8) == 0)
+	token = _strtok(buffer, " ");
+	token = _strtok(NULL, " ");
+
+	if (token == NULL)
 	{
-		token = _strtok(buffer, " ");
-		token = _strtok(NULL, " ");
-
-		if (token == NULL)
-		{
-			write(STDERR_FILENO, "Usage: unsetenv VARIABLE\n", 25);
-			return;
-		}
-
-		if (unsetenv(token) == -1)
-			perror("unsetenv");
-		else
-			*envp = environ;
+		write(STDERR_FILENO, "Usage: unsetenv VARIABLE\n", 25);
+		return;
 	}
+
+	if (unsetenv(token) == -1)
+		perror("unsetenv");
+	else
+		*envp = environ;
 }

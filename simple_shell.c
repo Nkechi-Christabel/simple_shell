@@ -1,76 +1,54 @@
 #include "shell.h"
 
 /**
- * handle_exec - is a helper function to main
- *
- * @buffer: contains the command
- */
-void handle_exec(char *buffer)
-{
-	char **args, *command_path;
-	int i;
-
-	args = tokens(buffer);
-
-	command_path = find_executable_path(args[0]);
-	if (command_path == NULL)
-	{
-		perror("Command not found");
-		free(buffer);
-		free(args);
-		return;
-	}
-
-	call_fork(buffer, args, command_path);
-	free(command_path);
-
-	for (i = 0; args[i] != NULL; i++)
-		free(args[i]);
-	free(args);
-}
-/**
  * handle_input - Handles user input and processing commands
- * @buffer: contains the input
  * @current_dir: Current directory
  * @envp: Array of environment variable
- * Return: 0
  */
 
-int handle_input(char *buffer, char *current_dir, char *envp[])
+int handle_input(char *current_dir, char *envp[])
 {
-	char *command, *trim_cmd;
-	size_t len;
+	char *buffer = NULL, **args, *command_path;
+	int i, pipe = 1;
 
-
-	command = strtok(buffer, ";");
-	while (command != NULL)
+	while (1 && pipe)
 	{
-		trim_cmd = command;
-		while (*trim_cmd == ' ' || *trim_cmd == '\t' || *trim_cmd == '\n')
-			trim_cmd++;
-		len = strlen(trim_cmd);
-		while (len > 0 && (trim_cmd[len - 1] == ' ' ||
-			trim_cmd[len - 1] == '\t' || trim_cmd[len - 1] == '\n'))
+		if (isatty(STDIN_FILENO) == 0)
+			pipe = 0;
+		write(STDOUT_FILENO, ":)$ ", 4);
+		fflush(stdout);
+		if (getline_inp(&buffer) == -1)
 		{
-			trim_cmd[len - 1] = '\0';
-			len--;
+			write(STDOUT_FILENO, "\n", 2);
+			break;
 		}
-		if (len > 0)
+		exit_func(buffer);
+		env_builtin(buffer, envp);
+		if (strncmp(buffer, "setenv", 6) == 0)
+			setenv_builtin(buffer, &envp);
+		else if (strncmp(buffer, "unsetenv", 8) == 0)
+			unsetenv_builtin(buffer, &envp);
+		else if (strncmp(buffer, "cd", 2) == 0)
+			cd_builtin(buffer, &current_dir);
+		else
 		{
-			exit_func(trim_cmd);
-			env_builtin(trim_cmd, envp);
-
-			if (strncmp(trim_cmd, "setenv", 6) == 0)
-				setenv_builtin(trim_cmd, &envp);
-			else if (strncmp(trim_cmd, "unsetenv", 8) == 0)
-				unsetenv_builtin(trim_cmd, &envp);
-			else if (strncmp(trim_cmd, "cd", 2) == 0)
-				cd_builtin(trim_cmd, &current_dir);
-			else
-				handle_exec(trim_cmd);
+			args = tokens(buffer);
+			command_path = find_executable_path(args[0]);
+			if (command_path == NULL)
+			{
+				perror("Command not found");
+				free(buffer);
+				free(args);
+				continue;
+			}
+			call_fork(buffer, args, command_path);
+			free(command_path);
+			for (i = 0; args[i] != NULL; i++)
+				free(args[i]);
+			free(args);
 		}
-		command = strtok(NULL, ";");
 	}
+	free(buffer);
 	return (0);
 }
 
@@ -86,8 +64,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 		char *argv[], char *envp[])
 {
 	char *home_dir = "/home/username", *current_dir = NULL;
-	char *buffer = NULL;
-	int pipe = 1;
 
 	current_dir = strdup(home_dir);
 	current_dir = strdup(home_dir);
@@ -98,20 +74,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 		exit(EXIT_FAILURE);
 	}
 
-	while (1 && pipe)
-	{
-		if (isatty(STDIN_FILENO) == 0)
-			pipe = 0;
-		write(STDOUT_FILENO, ":)$ ", 4);
-		fflush(stdout);
-		if (getline_inp(&buffer) == -1)
-		{
-			write(STDOUT_FILENO, "\n", 2);
-			break;
-		}
-		handle_input(buffer, current_dir, envp);
-	}
-	free(buffer);
+	handle_input(current_dir, envp);
+
 	free(current_dir);
 	return (0);
 }
