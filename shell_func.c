@@ -161,6 +161,5 @@ void cd_builtin(char *buffer, char **current_dir)
 		return;
 	}
 
-	free(*current_dir);
 	*current_dir = new_dir;
 }
