@@ -9,7 +9,7 @@
  *
  */
 
-void call_fork(char *buffer, char **args, char *command_path)
+int call_fork(char *buffer, char **args, char *command_path)
 {
 	pid_t pid;
 	int status;
@@ -40,6 +40,7 @@ void call_fork(char *buffer, char **args, char *command_path)
 		free(args);
 		exit(EXIT_FAILURE);
 	}
+	return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
 }
 
 /**
@@ -51,33 +52,30 @@ void setenv_builtin(char *buffer, char ***envp)
 {
 	char *token, *var_name, *var_value;
 
-	if (strncmp(buffer, "setenv", 6) == 0)
+	token = _strtok(buffer, " ");
+	token = _strtok(NULL, " ");
+
+	if (token == NULL)
 	{
-		token = _strtok(buffer, " ");
-		token = _strtok(NULL, " ");
-
-		if (token == NULL)
-		{
-			write(STDERR_FILENO, "Usage: setenv VARIABLE VALUE\n", 30);
-			return;
-		}
-
-		var_name = token;
-		token = _strtok(NULL, " ");
-
-		if (token == NULL)
-		{
-			write(STDERR_FILENO, "Usage: setenv VARIABLE VALUE\n", 30);
-			return;
-		}
-
-		var_value = token;
-
-		if (setenv(var_name, var_value, 1) == -1)
-			perror("setenv");
-		else
-			*envp = environ;
+		write(STDERR_FILENO, "Usage: setenv VARIABLE VALUE\n", 30);
+		return;
 	}
+
+	var_name = token;
+	token = _strtok(NULL, " ");
+
+	if (token == NULL)
+	{
+		write(STDERR_FILENO, "Usage: setenv VARIABLE VALUE\n", 30);
+		return;
+	}
+
+	var_value = token;
+
+	if (setenv(var_name, var_value, 1) == -1)
+		perror("setenv");
+	else
+		*envp = environ;
 }
 
 /**
@@ -88,6 +86,7 @@ void setenv_builtin(char *buffer, char ***envp)
 void unsetenv_builtin(char *buffer, char ***envp)
 {
 	char *token;
+
 
 	token = _strtok(buffer, " ");
 	token = _strtok(NULL, " ");

@@ -1,15 +1,48 @@
 #include "shell.h"
 
 /**
+ * handle_exec - is a helper function to main
+ *
+ * @buffer: contains the command
+ * Return: status
+ */
+int handle_exec(char *buffer)
+{
+	char **args, *command_path;
+	int i;
+	int status;
+
+	args = tokens(buffer);
+
+	command_path = find_executable_path(args[0]);
+	if (command_path == NULL)
+	{
+		perror("Command not found");
+		free(buffer);
+		free(args);
+		return (-1);
+	}
+
+	status = call_fork(buffer, args, command_path);
+	free(command_path);
+
+	for (i = 0; args[i] != NULL; i++)
+		free(args[i]);
+	free(args);
+
+	return (status);
+}
+/**
  * handle_input - Handles user input and processing commands
+ *
  * @current_dir: Current directory
  * @envp: Array of environment variable
+ * Return: 0
  */
-
 int handle_input(char *current_dir, char *envp[])
 {
-	char *buffer = NULL, **args, *command_path;
-	int i, pipe = 1;
+	char *buffer = NULL;
+	int pipe = 1;
 
 	while (1 && pipe)
 	{
@@ -30,23 +63,14 @@ int handle_input(char *current_dir, char *envp[])
 			unsetenv_builtin(buffer, &envp);
 		else if (strncmp(buffer, "cd", 2) == 0)
 			cd_builtin(buffer, &current_dir);
+		else if  (strstr(buffer, "&&") != NULL)
+			handle_logical_and(buffer);
+		else if (strstr(buffer, "||") != NULL)
+			handle_logical_or(buffer);
+		else if (strstr(buffer, ";") != NULL)
+			handle_semicolon(buffer);
 		else
-		{
-			args = tokens(buffer);
-			command_path = find_executable_path(args[0]);
-			if (command_path == NULL)
-			{
-				perror("Command not found");
-				free(buffer);
-				free(args);
-				continue;
-			}
-			call_fork(buffer, args, command_path);
-			free(command_path);
-			for (i = 0; args[i] != NULL; i++)
-				free(args[i]);
-			free(args);
-		}
+			handle_exec(buffer);
 	}
 	free(buffer);
 	return (0);
@@ -56,7 +80,7 @@ int handle_input(char *current_dir, char *envp[])
  * main - create a custom shell
  * @envp: Array of environment variables
  * @argc: is the number of items in argv
- * @argv: is a NULL terminated array of strings
+ * @argv: is a N:LL terminated array of strings
  *
  * Return: 0 always (Success)
  */
