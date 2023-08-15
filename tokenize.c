@@ -5,17 +5,17 @@
  * @str: The string to tokenize
  * @delim: The delimiter or separator
  *
- * Return: Each 
+ * Return: Each
  */
 char *_strtok(char *str, const char *delim)
 {
 	char *start, *end;
-	static char *token = NULL;
+	static char *token;
 
 	if (str != NULL)
 		token = str;
 	else if (token == NULL)
-		return NULL;
+		return (NULL);
 
 	start = token;
 	end = strpbrk(start, delim);
@@ -28,7 +28,7 @@ char *_strtok(char *str, const char *delim)
 	else
 		token = NULL;
 
-	return start;
+	return (start);
 }
 
 /**
@@ -43,6 +43,11 @@ char **tokens(char *buffer)
 	char *copy, *token, **argv = NULL, *delim = " ";
 
 	copy = strdup(buffer);
+	if (!copy)
+	{
+		perror("Memory allocation failed");
+		exit(EXIT_FAILURE);
+	}
 	token = _strtok(buffer, delim);
 
 	while (token)
@@ -50,7 +55,7 @@ char **tokens(char *buffer)
 		token = _strtok(NULL, delim);
 		argc++;
 	}
-
+	argc = argc > 0 ? argc : 1;
 	argv = malloc(sizeof(char *) * (argc + 1));
 	if (!argv)
 	{
@@ -58,22 +63,20 @@ char **tokens(char *buffer)
 		exit(EXIT_FAILURE);
 	}
 	token = _strtok(copy, delim);
-
 	while (token)
 	{
 		argv[i] = strdup(token);
 		if (!argv[i])
 		{
 			perror("Memory allocation failed");
+			free(copy);
 			exit(EXIT_FAILURE);
 		}
 		token = _strtok(NULL, delim);
 		i++;
 	}
-
 	argv[argc] = NULL;
 	free(copy);
 
 	return (argv);
 }
-

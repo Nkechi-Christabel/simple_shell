@@ -8,10 +8,18 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
-#define BUFFER_SIZE 1024
+#include <stdbool.h>
 
 extern char **environ;
+
+#define BUFFER_SIZE 1024
+#define MAX_ALIASES 50
+
+typedef struct {
+    char *name;
+    char *value;
+}Alias;
+
 
 ssize_t getline_inp(char **buffer);
 void env_builtin(char *buffer, char **envp);
@@ -29,5 +37,11 @@ int handle_exec(char *buffer);
 void handle_logical_and(char *cmd);
 void handle_logical_or(char *cmd);
 void handle_semicolon(char *buffer);
+void print_string(const char *str);
+void list_aliases(Alias *aliases, int num_aliases);
+void create_or_modify_alias(const char *token, Alias *aliases,
+		int *num_aliases);
+
+void alias_builtin(char *buffer, Alias *aliases, int *num_aliases);
 
 #endif /* SHELL_H */
