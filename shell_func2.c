@@ -87,7 +87,6 @@ void unsetenv_builtin(char *buffer, char ***envp)
 {
 	char *token;
 
-
 	token = _strtok(buffer, " ");
 	token = _strtok(NULL, " ");
 
@@ -102,3 +101,4 @@ void unsetenv_builtin(char *buffer, char ***envp)
 	else
 		*envp = environ;
 }
+
