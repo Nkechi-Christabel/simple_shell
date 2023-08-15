@@ -24,9 +24,9 @@ void list_aliases(Alias *aliases, int num_aliases)
 	for (i = 0; i < num_aliases; i++)
 	{
 		print_string(aliases[i].name);
-		print_string("='");
+		print_string("=");
 		print_string(aliases[i].value);
-		print_string("'\n");
+		print_string("\n");
 	}
 }
 
@@ -87,18 +87,35 @@ void create_or_modify_alias(const char *token, Alias *aliases,
 void alias_builtin(char *buffer, Alias *aliases, int *num_aliases)
 {
 	char *token;
+	char *command;
+	int i, alias_index = -1;
 
-	token = _strtok(buffer, " ");
-	token = _strtok(NULL, " ");
+	token = strchr(buffer, ' ');
 
 	if (token == NULL)
 		list_aliases(aliases, *num_aliases);
 	else
 	{
-		while (token != NULL)
+		command = strdup(token + 1);
+		for (i = 0; i < *num_aliases; i++)
 		{
-			create_or_modify_alias(token, aliases, num_aliases);
-			token = _strtok(NULL, " ");
+			if (strcmp(aliases[i].name, command) == 0)
+			{
+				alias_index = i;
+				break;
+			}
 		}
+
+		if (alias_index == -1)
+			create_or_modify_alias(command, aliases, num_aliases);
+		else
+		{
+			print_string(aliases[alias_index].name);
+			print_string("=");
+			print_string(aliases[alias_index].value);
+			print_string("\n");
+		}
+
+		free(command);
 	}
 }
