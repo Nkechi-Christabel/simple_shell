@@ -32,6 +32,7 @@ int handle_exec(char *buffer)
 
 	return (status);
 }
+
 /**
  * handle_input - Handles user input and processing commands
  *
@@ -42,7 +43,8 @@ int handle_exec(char *buffer)
 int handle_input(char *current_dir, char *envp[])
 {
 	char *buffer = NULL;
-	int pipe = 1;
+	int pipe = 1, num_aliases = 0;
+	Alias aliases[MAX_ALIASES];
 
 	while (1 && pipe)
 	{
@@ -61,6 +63,8 @@ int handle_input(char *current_dir, char *envp[])
 			setenv_builtin(buffer, &envp);
 		else if (strncmp(buffer, "unsetenv", 8) == 0)
 			unsetenv_builtin(buffer, &envp);
+		else if (strncmp(buffer, "alias", 5) == 0)
+			alias_builtin(buffer, aliases, &num_aliases);
 		else if (strncmp(buffer, "cd", 2) == 0)
 			cd_builtin(buffer, &current_dir);
 		else if  (strstr(buffer, "&&") != NULL)
