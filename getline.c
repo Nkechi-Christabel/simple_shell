@@ -4,6 +4,7 @@
  * getline_inp - Gets command lines from standard input
  * @buffer: Where inputs are stored
  *
+ * Return: input
  */
 
 ssize_t getline_inp(char **buffer)
@@ -14,13 +15,13 @@ ssize_t getline_inp(char **buffer)
 	input = _getline(buffer, &buffer_size, stdin);
 	if (input == -1)
 	{
-		return -1;
+		return (-1);
 	}
 
 	if ((*buffer)[input - 1] == '\n')
 		(*buffer)[input - 1] = '\0';
 
-	return input;
+	return (input);
 
 }
 
