@@ -6,13 +6,14 @@
  * @buffer: contains the command
  * Return: status
  */
-int handle_exec(char *buffer)
+int handle_exec(char *buffer, int last_status)
 {
-	char **args, *command_path;
+	char **args, *command_path, *replaced_command;
 	int i;
 	int status;
 
-	args = tokens(buffer);
+	replaced_command = replace_variables(buffer, last_status);
+	args = tokens(replaced_command);
 
 	command_path = find_executable_path(args[0]);
 	if (command_path == NULL)
@@ -20,6 +21,7 @@ int handle_exec(char *buffer)
 		perror("Command not found");
 		free(buffer);
 		free(args);
+		free(replaced_command);
 		return (-1);
 	}
 
@@ -28,7 +30,9 @@ int handle_exec(char *buffer)
 
 	for (i = 0; args[i] != NULL; i++)
 		free(args[i]);
+
 	free(args);
+	free(replaced_command);
 
 	return (status);
 }
@@ -43,7 +47,7 @@ int handle_exec(char *buffer)
 int handle_input(char *current_dir, char *envp[])
 {
 	char *buffer = NULL;
-	int pipe = 1, num_aliases = 0;
+	int pipe = 1, num_aliases = 0, last_status = 0;
 	Alias aliases[MAX_ALIASES];
 
 	while (1 && pipe)
@@ -68,13 +72,13 @@ int handle_input(char *current_dir, char *envp[])
 		else if (strncmp(buffer, "cd", 2) == 0)
 			cd_builtin(buffer, &current_dir);
 		else if  (strstr(buffer, "&&") != NULL)
-			handle_logical_and(buffer);
+			handle_logical_and(buffer, last_status);
 		else if (strstr(buffer, "||") != NULL)
-			handle_logical_or(buffer);
+			handle_logical_or(buffer, last_status);
 		else if (strstr(buffer, ";") != NULL)
-			handle_semicolon(buffer);
+			handle_semicolon(buffer, last_status);
 		else
-			handle_exec(buffer);
+			last_status = handle_exec(buffer, last_status);
 	}
 	free(buffer);
 	return (0);
@@ -93,7 +97,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused))
 {
 	char *home_dir = "/home/username", *current_dir = NULL;
 
-	current_dir = strdup(home_dir);
 	current_dir = strdup(home_dir);
 
 	if (current_dir == NULL)

@@ -102,3 +102,66 @@ void unsetenv_builtin(char *buffer, char ***envp)
 		*envp = environ;
 }
 
+/**
+ * replace_variables - Handles command '$' and "$$"
+ * @command: The command line to check
+ * @status: Keeps track of the exit status
+ *
+ * Return: The expanded variable
+ */
+char *replace_variables_$(const char *command, int status) {
+    char *result = NULL;
+    const char *ptr = command;
+    size_t len = 0;
+    char var_name[256]; // Maximum variable name length
+
+    while (*ptr) {
+        if (*ptr == '$') {
+            if (*(ptr + 1) == '?') {
+                char status_str[16];
+                snprintf(status_str, sizeof(status_str), "%d", status);
+                size_t status_len = strlen(status_str);
+                result = realloc(result, len + status_len + 1);
+                if (!result) {
+                    perror("Memory allocation failed");
+                    exit(EXIT_FAILURE);
+                }
+                strcpy(result + len, status_str);
+                len += status_len;
+                ptr += 2; // Skip past the '$?' sequence
+                continue;
+            } else if (*(ptr + 1) == '$') {
+                // Replace $$ with the current process ID
+                char pid_str[16];
+                snprintf(pid_str, sizeof(pid_str), "%d", getpid());
+                size_t pid_len = strlen(pid_str);
+                result = realloc(result, len + pid_len + 1);
+                if (!result) {
+                    perror("Memory allocation failed");
+                    exit(EXIT_FAILURE);
+                }
+                strcpy(result + len, pid_str);
+                len += pid_len;
+                ptr += 2;
+                continue;
+            }
+        }
+
+        result = realloc(result, len + 2);
+        if (!result) {
+            perror("Memory allocation failed");
+            exit(EXIT_FAILURE);
+        }
+        result[len++] = *ptr++;
+    }
+
+    result = realloc(result, len + 1);
+    if (!result) {
+        perror("Memory allocation failed");
+        exit(EXIT_FAILURE);
+    }
+    result[len] = '\0';
+
+    return result;
+}
+
