@@ -5,7 +5,7 @@
  *
  * @buffer: contains the command
  */
-void handle_semicolon(char *buffer)
+void handle_semicolon(char *buffer, int last_status)
 {
 	char *command, *trim_cmd;
 	size_t len;
@@ -27,7 +27,7 @@ void handle_semicolon(char *buffer)
 		}
 		if (len > 0)
 		{
-			handle_exec(trim_cmd);
+			handle_exec(trim_cmd, last_status);
 		}
 
 		command = strtok(NULL, ";");
@@ -39,7 +39,7 @@ void handle_semicolon(char *buffer)
  *
  * @cmd: contains the command
  */
-void handle_logical_or(char *cmd)
+void handle_logical_or(char *cmd, int last_status)
 {
 	char *or_token = "||";
 	char *pos = cmd, *next_cmd;
@@ -63,7 +63,7 @@ void handle_logical_or(char *cmd)
 
 		if (len > 0)
 		{
-			result = handle_exec(pos);
+			result = handle_exec(pos, last_status);
 			if (result == 0)
 				return;
 		}
@@ -79,7 +79,7 @@ void handle_logical_or(char *cmd)
 		len--;
 	}
 	if (len > 0)
-		handle_exec(pos);
+		handle_exec(pos, last_status);
 }
 
 /**
@@ -87,7 +87,7 @@ void handle_logical_or(char *cmd)
  *
  * @cmd: contains the command
  */
-void handle_logical_and(char *cmd)
+void handle_logical_and(char *cmd, int last_status)
 {
 	char *and_token = "&&";
 	char *pos = cmd, *next_cmd;
@@ -108,7 +108,7 @@ void handle_logical_and(char *cmd)
 		}
 		if (len > 0)
 		{
-			result = handle_exec(pos);
+			result = handle_exec(pos, last_status);
 			if (result != 0)
 				return;
 		}
@@ -125,5 +125,5 @@ void handle_logical_and(char *cmd)
 		len--;
 	}
 	if (len > 0)
-		handle_exec(pos);
+		handle_exec(pos, last_status);
 }

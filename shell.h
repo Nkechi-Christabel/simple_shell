@@ -33,15 +33,18 @@ char *find_executable_path(const char *cmd);
 void setenv_builtin(char *buffer, char ***envp);
 void unsetenv_builtin(char *buffer, char ***envp);
 void cd_builtin(char *buffer, char **current_dir);
-int handle_exec(char *buffer);
-void handle_logical_and(char *cmd);
-void handle_logical_or(char *cmd);
-void handle_semicolon(char *buffer);
+int handle_exec(char *buffer, int last_status);
+void handle_logical_and(char *cmd, int last_status);
+void handle_logical_or(char *cmd, int last_status);
+void handle_semicolon(char *buffer, int last_status);
 void print_string(const char *str);
 void list_aliases(Alias *aliases, int num_aliases);
 void create_or_modify_alias(const char *token, Alias *aliases,
 		int *num_aliases);
-
 void alias_builtin(char *buffer, Alias *aliases, int *num_aliases);
+char *replace_variables(const char *command, int last_status);
+char *replace_exit_status(char *result, size_t *len, int status);
+char *replace_process_id(char *result, size_t *len);
+char *finalize_result(char *result, size_t len);
 
 #endif /* SHELL_H */
