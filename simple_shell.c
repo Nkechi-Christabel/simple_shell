@@ -62,32 +62,27 @@ int handle_input(char *current_dir, char *envp[])
 			write(STDOUT_FILENO, "\n", 2);
 			break;
 		}
-		if (buffer == NULL || strcmp(buffer, "") == 0)
-		{
-			free(buffer);
+		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#')
 			continue;
-		}
+		handle_comment(buffer);
+		exit_func(buffer);
+		env_builtin(buffer, envp);
+		if (strncmp(buffer, "setenv", 6) == 0)
+			setenv_builtin(buffer, &envp);
+		else if (strncmp(buffer, "unsetenv", 8) == 0)
+			unsetenv_builtin(buffer, &envp);
+		else if (strncmp(buffer, "alias", 5) == 0)
+			alias_builtin(buffer, aliases, &num_aliases);
+		else if (strncmp(buffer, "cd", 2) == 0)
+			cd_builtin(buffer, &current_dir);
+		else if  (strstr(buffer, "&&") != NULL)
+			handle_logical_and(buffer, last_status);
+		else if (strstr(buffer, "||") != NULL)
+			handle_logical_or(buffer, last_status);
+		else if (strstr(buffer, ";") != NULL)
+			handle_semicolon(buffer, last_status);
 		else
-		{
-			exit_func(buffer);
-			env_builtin(buffer, envp);
-			if (strncmp(buffer, "setenv", 6) == 0)
-				setenv_builtin(buffer, &envp);
-			else if (strncmp(buffer, "unsetenv", 8) == 0)
-				unsetenv_builtin(buffer, &envp);
-			else if (strncmp(buffer, "alias", 5) == 0)
-				alias_builtin(buffer, aliases, &num_aliases);
-			else if (strncmp(buffer, "cd", 2) == 0)
-				cd_builtin(buffer, &current_dir);
-			else if  (strstr(buffer, "&&") != NULL)
-				handle_logical_and(buffer, last_status);
-			else if (strstr(buffer, "||") != NULL)
-				handle_logical_or(buffer, last_status);
-			else if (strstr(buffer, ";") != NULL)
-				handle_semicolon(buffer, last_status);
-			else
-				last_status = handle_exec(buffer, last_status);
-		}
+			last_status = handle_exec(buffer, last_status);
 	}
 	free(buffer);
 	return (0);

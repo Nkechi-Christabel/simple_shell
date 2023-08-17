@@ -51,5 +51,6 @@ int is_valid_variable_character(char c);
 char *append_string(char *result, const char *str, size_t *len);
 char *echo_path(char *result, size_t *len, const char *var_name_start);
 size_t get_variable_name_length(const char *var_name_start);
+void handle_comment(char *buffer);
 
 #endif /* SHELL_H */
