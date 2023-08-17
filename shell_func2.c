@@ -7,6 +7,7 @@
  * @args: tokenized buffer
  * @command_path: contains the path
  *
+ * Return: WEXITSTATUS(status)
  */
 
 int call_fork(char *buffer, char **args, char *command_path)
@@ -40,7 +41,7 @@ int call_fork(char *buffer, char **args, char *command_path)
 		free(args);
 		exit(EXIT_FAILURE);
 	}
-	return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+	return (WIFEXITED(status) ? WEXITSTATUS(status) : -1);
 }
 
 /**
@@ -102,4 +103,17 @@ void unsetenv_builtin(char *buffer, char ***envp)
 		*envp = environ;
 }
 
+/**
+ * handle_comment - checks for #
+ *
+ * @buffer: checks the command
+ */
+void handle_comment(char *buffer)
+{
+	char *comment_start = strchr(buffer, '#');
 
+	if (comment_start != NULL)
+	{
+		*comment_start = '\0';
+	}
+}
