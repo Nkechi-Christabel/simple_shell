@@ -29,8 +29,13 @@ char *replace_variables(const char *command, int status)
 				ptr += 2;
 				continue;
 			}
+			else if (is_valid_variable_character(*(ptr + 1)))
+			{
+				result = echo_path(result, &len, ptr + 1);
+				ptr += get_variable_name_length(ptr + 1);
+				continue;
+			}
 		}
-
 		result = realloc(result, len + 2);
 		if (!result)
 		{
@@ -39,7 +44,6 @@ char *replace_variables(const char *command, int status)
 		}
 		result[len++] = *ptr++;
 	}
-
 	result = finalize_result(result, len);
 	return (result);
 }
@@ -56,31 +60,31 @@ char *replace_exit_status(char *result, size_t *len, int status)
 {
 	int num_digits = 1, temp_status = status, i;
 
-	 while (temp_status >= 10)
-	 {
-		 temp_status /= 10;
-		 num_digits++;
-	 }
+	while (temp_status >= 10)
+	{
+		temp_status /= 10;
+		num_digits++;
+	}
 
-	 result = realloc(result, *len + num_digits + 1);
+	result = realloc(result, *len + num_digits + 1);
 
-	 if (!result)
-	 {
-		 perror("Memory allocation failed");
-		 exit(EXIT_FAILURE);
-	 }
+	if (!result)
+	{
+		perror("Memory allocation failed");
+		exit(EXIT_FAILURE);
+	}
 
-	 temp_status = status;
+	temp_status = status;
 
-	 for (i = num_digits - 1; i >= 0; i--)
-	 {
-		 result[*len + i] = '0' + (temp_status % 10);
-		 temp_status /= 10;
-	 }
+	for (i = num_digits - 1; i >= 0; i--)
+	{
+		result[*len + i] = '0' + (temp_status % 10);
+		temp_status /= 10;
+	}
 
-	 *len += num_digits;
+	*len += num_digits;
 
-	 return (result);
+	return (result);
 }
 
 /**
@@ -92,31 +96,31 @@ char *replace_exit_status(char *result, size_t *len, int status)
  */
 char *replace_process_id(char *result, size_t *len)
 {
-	    int pid = getpid(), num_digits = 1, temp_pid = pid, i;
+	int pid = getpid(), num_digits = 1, temp_pid = pid, i;
 
-	    while (temp_pid >= 10)
-	    {
-		    temp_pid /= 10;
-		    num_digits++;
-	    }
+	while (temp_pid >= 10)
+	{
+		temp_pid /= 10;
+		num_digits++;
+	}
 
-	    result = realloc(result, *len + num_digits + 1);
-	    if (!result)
-	    {
-		    perror("Memory allocation failed");
-		    exit(EXIT_FAILURE);
-	    }
+	result = realloc(result, *len + num_digits + 1);
+	if (!result)
+	{
+		perror("Memory allocation failed");
+		exit(EXIT_FAILURE);
+	}
 
-	    temp_pid = pid;
+	temp_pid = pid;
 
-	    for (i = num_digits - 1; i >= 0; i--)
-	    {
-		    result[*len + i] = '0' + (temp_pid % 10);
-		    temp_pid /= 10;
-	    }
+	for (i = num_digits - 1; i >= 0; i--)
+	{
+		result[*len + i] = '0' + (temp_pid % 10);
+		temp_pid /= 10;
+	}
 
-	    *len += num_digits;
-	    return (result);
+	*len += num_digits;
+	return (result);
 }
 
 /**
