@@ -3,6 +3,7 @@
 /**
  * handle_semicolon - handles commands with semi colon ;
  *
+ * @last_status: contains the last exit status
  * @buffer: contains the command
  */
 void handle_semicolon(char *buffer, int last_status)
@@ -37,6 +38,7 @@ void handle_semicolon(char *buffer, int last_status)
 /**
  * handle_logical_or - handles commands with OR operator ||
  *
+ * @last_status: contains the last exit status
  * @cmd: contains the command
  */
 void handle_logical_or(char *cmd, int last_status)
@@ -85,6 +87,7 @@ void handle_logical_or(char *cmd, int last_status)
 /**
  * handle_logical_and - handles commands with AND operator &&
  *
+ * @last_status: contains the last exit status
  * @cmd: contains the command
  */
 void handle_logical_and(char *cmd, int last_status)

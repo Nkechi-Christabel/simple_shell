@@ -47,4 +47,9 @@ char *replace_exit_status(char *result, size_t *len, int status);
 char *replace_process_id(char *result, size_t *len);
 char *finalize_result(char *result, size_t len);
 
+int is_valid_variable_character(char c);
+char *append_string(char *result, const char *str, size_t *len);
+char *echo_path(char *result, size_t *len, const char *var_name_start);
+size_t get_variable_name_length(const char *var_name_start);
+
 #endif /* SHELL_H */
