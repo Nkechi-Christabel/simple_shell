@@ -45,65 +45,6 @@ int call_fork(char *buffer, char **args, char *command_path)
 }
 
 /**
- * setenv_builtin - Set or modify an environment variable
- * @buffer: contains the command
- * @envp: Pointer to array of environment variables
- */
-void setenv_builtin(char *buffer, char ***envp)
-{
-	char *token, *var_name, *var_value;
-
-	token = _strtok(buffer, " ");
-	token = _strtok(NULL, " ");
-
-	if (token == NULL)
-	{
-		write(STDERR_FILENO, "Usage: setenv VARIABLE VALUE\n", 30);
-		return;
-	}
-
-	var_name = token;
-	token = _strtok(NULL, " ");
-
-	if (token == NULL)
-	{
-		write(STDERR_FILENO, "Usage: setenv VARIABLE VALUE\n", 30);
-		return;
-	}
-
-	var_value = token;
-
-	if (setenv(var_name, var_value, 1) == -1)
-		perror("setenv");
-	else
-		*envp = environ;
-}
-
-/**
- * unsetenv_builtin - Unset an environment variable
- * @buffer: contains the command
- * @envp: Pointer to array of environment variables
- */
-void unsetenv_builtin(char *buffer, char ***envp)
-{
-	char *token;
-
-	token = _strtok(buffer, " ");
-	token = _strtok(NULL, " ");
-
-	if (token == NULL)
-	{
-		write(STDERR_FILENO, "Usage: unsetenv VARIABLE\n", 25);
-		return;
-	}
-
-	if (unsetenv(token) == -1)
-		perror("unsetenv");
-	else
-		*envp = environ;
-}
-
-/**
  * handle_comment - checks for #
  *
  * @buffer: checks the command
@@ -113,7 +54,5 @@ void handle_comment(char *buffer)
 	char *comment_start = strchr(buffer, '#');
 
 	if (comment_start != NULL)
-	{
 		*comment_start = '\0';
-	}
 }
