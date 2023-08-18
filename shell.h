@@ -54,5 +54,7 @@ size_t get_variable_name_length(const char *var_name_start);
 void handle_comment(char *buffer);
 void handle_input2(char *buffer, char *current_dir, char *envp[], Alias *aliases,
 		int *num_aliases, int last_status);
+int _setenv(const char *name, const char *value, int overwrite);
+int _unsetenv(const char *name);
 
 #endif /* SHELL_H */
