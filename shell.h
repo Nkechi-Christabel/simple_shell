@@ -52,5 +52,7 @@ char *append_string(char *result, const char *str, size_t *len);
 char *echo_path(char *result, size_t *len, const char *var_name_start);
 size_t get_variable_name_length(const char *var_name_start);
 void handle_comment(char *buffer);
+void handle_input2(char *buffer, char *current_dir, char *envp[], Alias *aliases,
+		int *num_aliases, int last_status);
 
 #endif /* SHELL_H */

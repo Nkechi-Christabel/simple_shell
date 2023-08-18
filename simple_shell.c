@@ -43,13 +43,16 @@ int handle_exec(char *buffer, int last_status)
  *
  * @current_dir: Current directory
  * @envp: Array of environment variable
+ * @aliases: An array of Alias structure
+ * @num_aliases: The number of aliases
+ * @last_status: contains the last exit status
  * Return: 0
  */
-int handle_input(char *current_dir, char *envp[])
+int handle_input(char *current_dir, char *envp[], Alias *aliases,
+		int *num_aliases, int last_status)
 {
 	char *buffer = NULL;
-	int pipe = 1, num_aliases = 0, last_status = 0;
-	Alias aliases[MAX_ALIASES];
+	int pipe = 1;
 
 	while (1 && pipe)
 	{
@@ -72,7 +75,7 @@ int handle_input(char *current_dir, char *envp[])
 		else if (strncmp(buffer, "unsetenv", 8) == 0)
 			unsetenv_builtin(buffer, &envp);
 		else if (strncmp(buffer, "alias", 5) == 0)
-			alias_builtin(buffer, aliases, &num_aliases);
+			alias_builtin(buffer, aliases, num_aliases);
 		else if (strncmp(buffer, "cd", 2) == 0)
 			cd_builtin(buffer, &current_dir);
 		else if  (strstr(buffer, "&&") != NULL)
@@ -96,21 +99,76 @@ int handle_input(char *current_dir, char *envp[])
  *
  * Return: 0 always (Success)
  */
-int main(__attribute__((unused)) int argc, __attribute__((unused))
-		char *argv[], char *envp[])
+int main(int argc, char *argv[], char *envp[])
 {
-	char *home_dir = "/home/username", *current_dir = NULL;
+	char *home_dir = "/home/username", *current_dir = NULL, *line = NULL;
+	int last_status = 0, num_aliases = 0;
+	size_t len = 0;
+	ssize_t read;
+	Alias aliases[MAX_ALIASES];
 
 	current_dir = strdup(home_dir);
-
 	if (current_dir == NULL)
 	{
 		perror("strdup");
 		exit(EXIT_FAILURE);
 	}
+	if (argc > 1)
+	{
+		FILE *file = fopen(argv[1], "r");
 
-	handle_input(current_dir, envp);
-
+		if (file == NULL)
+		{
+			perror("Error opening file");
+			return (1);
+		}
+		while ((read = getline(&line, &len, file)) != -1)
+		{
+			line[strcspn(line, "\n")] = '\0';
+			if (strlen(line) == 0 || isspace((unsigned char)line[0]) || line[0] == '#')
+				continue;
+			handle_input2(line, current_dir, envp, aliases,
+					&num_aliases, last_status);
+		}
+		free(line);
+		fclose(file);
+	}
+	else
+		handle_input(current_dir, envp, aliases, &num_aliases, last_status);
 	free(current_dir);
 	return (0);
+}
+/**
+ * handle_input2 - Handles user input and processing commands
+ *
+ * @buffer: contains commands
+ * @current_dir: Current directory
+ * @envp: Array of environment variable
+ * @aliases: An array of Alias structure
+ * @num_aliases: The number of aliases
+ * @last_status: contains the last exit status
+ *
+ */
+void handle_input2(char *buffer, char *current_dir, char *envp[],
+		Alias *aliases, int *num_aliases, int last_status)
+{
+	handle_comment(buffer);
+	exit_func(buffer);
+	env_builtin(buffer, envp);
+	if (strncmp(buffer, "setenv", 6) == 0)
+		setenv_builtin(buffer, &envp);
+	else if (strncmp(buffer, "unsetenv", 8) == 0)
+		unsetenv_builtin(buffer, &envp);
+	else if (strncmp(buffer, "alias", 5) == 0)
+		alias_builtin(buffer, aliases, num_aliases);
+	else if (strncmp(buffer, "cd", 2) == 0)
+		cd_builtin(buffer, &current_dir);
+	else if  (strstr(buffer, "&&") != NULL)
+		handle_logical_and(buffer, last_status);
+	else if (strstr(buffer, "||") != NULL)
+		handle_logical_or(buffer, last_status);
+	else if (strstr(buffer, ";") != NULL)
+		handle_semicolon(buffer, last_status);
+	else
+		last_status = handle_exec(buffer, last_status);
 }
