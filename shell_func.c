@@ -10,14 +10,92 @@ void exit_func(char *buffer)
 {
 	if (strncmp(buffer, "exit", 4) == 0)
 	{
-		int status;
+		int status, i = 0, isNum;
 		char *arg = buffer + 4;
 
+		while (*arg == ' ')
+			arg++;
+
+		if (*arg)
+		{
+			isNum = 1;
+			while (arg[i])
+			{
+				if (arg[i] < '0' || arg[i] > '9')
+				{
+					isNum = 0;
+					break;
+				}
+				i++;
+			}
+		}
+
+		if(!isNum)
+		{
+			exit_invalid_argument_error(arg);
+			free(buffer);
+			exit(EXIT_FAILURE);
+		}
+
 		status = atoi(arg);
+		if (status < 0)
+		{
+			exit_negative_status_error(status);
+			free(buffer);
+			exit(EXIT_FAILURE);
+		}
 
 		free(buffer);
 		exit(status);
 	}
+}
+
+/**
+ * invalid_argument_error - Prints an error message for an invalid exit argument.
+ *
+ * @arg: The invalid argument passed to the exit command.
+ */
+void exit_invalid_argument_error(const char *arg)
+{
+	const char error_message[] = "Invalid exit argument: ";
+
+	write(STDERR_FILENO, error_message, sizeof(error_message) - 1);
+	write(STDERR_FILENO, arg, strlen(arg));
+	write(STDERR_FILENO, "\n", 1);
+}
+
+/**
+ * negative_status_error - Prints an error message for a negative exit status.
+ *
+ * @status: The negative exit status.
+ */
+void exit_negative_status_error(int status)
+{
+	const char error_message[] = "Exit status cannot be negative: ";
+	char *status_ptr,  status_str[12];
+	int status_len = 0, temp_status = status;
+
+	write(STDERR_FILENO, error_message, sizeof(error_message) - 1);
+	while (temp_status > 0)
+	{
+		temp_status /= 10;
+		status_len++;
+	}
+
+	temp_status = status;
+	status_ptr = status_str + status_len;
+	*status_ptr = '\0';
+	status_ptr--;
+
+	while (temp_status > 0)
+	{
+		*status_ptr = '0' + (temp_status % 10);
+		temp_status /= 10;
+		status_ptr--;
+	}
+	
+	write(STDERR_FILENO, status_str, strlen(status_str));
+	write(STDERR_FILENO, "\n", 1);
 }
 
 /**
@@ -121,45 +199,3 @@ char *find_executable_path(const char *cmd)
 	return (NULL);
 }
 
-/**
- * cd_builtin - Handles the "cd" command
- * @buffer: Input buffer to extract command and argument
- * @current_dir: The current directory
- */
-void cd_builtin(char *buffer, char **current_dir)
-{
-	char *token, *dir, *new_dir = NULL;
-	size_t max_len = 1024;
-
-	new_dir = (char *)malloc(max_len);
-
-	if (new_dir == NULL)
-	{
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	}
-
-	token = _strtok(buffer, " ");
-	token = _strtok(NULL, " ");
-
-	if (token == NULL || token[0] == '\0' || strcmp(token, "-") == 0)
-		dir = *current_dir;
-	else
-		dir = token;
-
-	if (chdir(dir) == -1)
-	{
-		perror("cd");
-		free(new_dir);
-		return;
-	}
-
-	if (getcwd(new_dir, max_len) == NULL)
-	{
-		perror("getcwd");
-		free(new_dir);
-		return;
-	}
-
-	*current_dir = new_dir;
-}
