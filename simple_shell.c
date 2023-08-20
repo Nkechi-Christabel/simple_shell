@@ -19,8 +19,9 @@ int handle_exec(char *buffer, int last_status)
 	command_path = find_executable_path(args[0]);
 	if (command_path == NULL)
 	{
-		/*perror("Command not found");*/
-		fprintf(stderr, "%s: command not found\n", args[0]);
+		/*ite(STDERR_FILENO, args[0], strlen(args[0]));
+		perror("Command not found");*/
+		fprintf(stderr, "%d: %s: not found\n",getpid(), args[0]);
 		free(buffer);
 		free(args);
 		free(replaced_command);
