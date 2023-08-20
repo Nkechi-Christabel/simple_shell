@@ -31,7 +31,7 @@ int call_fork(char *buffer, char **args, char *command_path)
 		free(buffer);
 		free(command_path);
 		free(args);
-		exit(EXIT_FAILURE);
+		_exit(EXIT_FAILURE);
 	}
 	if (waitpid(pid, &status, 0) == -1)
 	{
@@ -55,4 +55,24 @@ void handle_comment(char *buffer)
 
 	if (comment_start != NULL)
 		*comment_start = '\0';
+}
+/**
+ * contains_only_spaces - checks for space
+ *
+ * @str: contains string
+ * Return: !found_non_space;
+ */
+int contains_only_spaces(const char *str)
+{
+	int found_non_space = 0, i;
+
+	for (i = 0; str[i]; i++)
+	{
+		if (!isspace((unsigned char)str[i]))
+		{
+			found_non_space = 1;
+			break;
+		}
+	}
+	return (!found_non_space);
 }

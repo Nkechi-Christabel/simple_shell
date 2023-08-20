@@ -56,5 +56,7 @@ void handle_input2(char *buffer, char *current_dir, char *envp[], Alias *aliases
 		int *num_aliases, int last_status);
 int _setenv(const char *name, const char *value, int overwrite);
 int _unsetenv(const char *name);
+int contains_only_spaces(const char *str);
+void trim_spaces(char *str);
 
 #endif /* SHELL_H */

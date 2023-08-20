@@ -19,7 +19,8 @@ int handle_exec(char *buffer, int last_status)
 	command_path = find_executable_path(args[0]);
 	if (command_path == NULL)
 	{
-		perror("Command not found");
+		/*perror("Command not found");*/
+		fprintf(stderr, "%s: command not found\n", args[0]);
 		free(buffer);
 		free(args);
 		free(replaced_command);
@@ -52,21 +53,24 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 		int *num_aliases, int last_status)
 {
 	char *buffer = NULL;
-	int pipe = 1;
+	int is_interactive = isatty(STDIN_FILENO);
 
-	while (1 && pipe)
+	while (1)
 	{
-		if (isatty(STDIN_FILENO) == 0)
-			pipe = 0;
-		write(STDOUT_FILENO, ":)$ ", 4);
-		fflush(stdout);
+		if (is_interactive)
+		{
+			write(STDOUT_FILENO, ":)$ ", 4);
+			fflush(stdout);
+		}
 		if (getline_inp(&buffer) == -1)
 		{
-			write(STDOUT_FILENO, "\n", 2);
+			/*write(STDOUT_FILENO, "\n", 2);*/
 			break;
 		}
-		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#')
+		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#'
+				|| contains_only_spaces(buffer))
 			continue;
+		trim_spaces(buffer);
 		handle_comment(buffer);
 		exit_func(buffer);
 		env_builtin(buffer, envp);
@@ -135,7 +139,7 @@ int main(int argc, char *argv[], char *envp[])
 	}
 	else
 		handle_input(current_dir, envp, aliases, &num_aliases, last_status);
-	free(current_dir);
+	/*free(current_dir);*/
 	return (0);
 }
 /**
