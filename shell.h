@@ -24,6 +24,8 @@ typedef struct {
 ssize_t getline_inp(char **buffer);
 void env_builtin(char *buffer, char **envp);
 char **tokens(char *buffer);
+void exit_invalid_argument_error(const char *arg);
+void exit_negative_status_error(int status);
 void exit_func(char *buffer);
 int call_fork(char *buffer, char **args, char *command_path);
 ssize_t _getline(char **lineptr, size_t *n, FILE *stream);
@@ -54,5 +56,7 @@ size_t get_variable_name_length(const char *var_name_start);
 void handle_comment(char *buffer);
 void handle_input2(char *buffer, char *current_dir, char *envp[], Alias *aliases,
 		int *num_aliases, int last_status);
+int _setenv(const char *name, const char *value, int overwrite);
+int _unsetenv(const char *name);
 
 #endif /* SHELL_H */
