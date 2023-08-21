@@ -6,10 +6,11 @@
  * @last_status: contains the last exit status
  * @buffer: contains the command
  */
-void handle_semicolon(char *buffer, int last_status)
+int handle_semicolon(char *buffer, int last_status, char *shell_name, int *line)
 {
 	char *command, *trim_cmd;
 	size_t len;
+	int status;
 
 	command = strtok(buffer, ";");
 	while (command != NULL)
@@ -28,11 +29,13 @@ void handle_semicolon(char *buffer, int last_status)
 		}
 		if (len > 0)
 		{
-			handle_exec(trim_cmd, last_status);
+			status = handle_exec(trim_cmd, last_status, shell_name, line);
 		}
 
 		command = strtok(NULL, ";");
 	}
+
+	return (status);
 }
 
 /**
@@ -41,7 +44,7 @@ void handle_semicolon(char *buffer, int last_status)
  * @last_status: contains the last exit status
  * @cmd: contains the command
  */
-void handle_logical_or(char *cmd, int last_status)
+int handle_logical_or(char *cmd, int last_status, char *shell_name, int *line)
 {
 	char *or_token = "||";
 	char *pos = cmd, *next_cmd;
@@ -65,9 +68,9 @@ void handle_logical_or(char *cmd, int last_status)
 
 		if (len > 0)
 		{
-			result = handle_exec(pos, last_status);
+			result = handle_exec(pos, last_status, shell_name, line);
 			if (result == 0)
-				return;
+				return (result);
 		}
 		pos = next_cmd + strlen(or_token);
 	}
@@ -81,7 +84,9 @@ void handle_logical_or(char *cmd, int last_status)
 		len--;
 	}
 	if (len > 0)
-		handle_exec(pos, last_status);
+		result = handle_exec(pos, last_status, shell_name, line);
+	return (result);
+
 }
 
 /**
@@ -90,7 +95,7 @@ void handle_logical_or(char *cmd, int last_status)
  * @last_status: contains the last exit status
  * @cmd: contains the command
  */
-void handle_logical_and(char *cmd, int last_status)
+int handle_logical_and(char *cmd, int last_status, char *shell_name, int *line)
 {
 	char *and_token = "&&";
 	char *pos = cmd, *next_cmd;
@@ -111,9 +116,9 @@ void handle_logical_and(char *cmd, int last_status)
 		}
 		if (len > 0)
 		{
-			result = handle_exec(pos, last_status);
+			result = handle_exec(pos, last_status, shell_name, line);
 			if (result != 0)
-				return;
+				return (result);
 		}
 		pos = next_cmd + strlen(and_token);
 	}
@@ -128,5 +133,6 @@ void handle_logical_and(char *cmd, int last_status)
 		len--;
 	}
 	if (len > 0)
-		handle_exec(pos, last_status);
+		result = handle_exec(pos, last_status, shell_name, line);
+	return (result);
 }

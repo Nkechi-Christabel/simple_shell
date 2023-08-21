@@ -7,7 +7,7 @@
  * @last_status: contains the last exit status
  * Return: status
  */
-int handle_exec(char *buffer, int last_status)
+int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 {
 	char **args, *command_path, *replaced_command;
 	int i;
@@ -19,17 +19,16 @@ int handle_exec(char *buffer, int last_status)
 	command_path = find_executable_path(args[0]);
 	if (command_path == NULL)
 	{
-		/*ite(STDERR_FILENO, args[0], strlen(args[0]));
-		perror("Command not found");*/
-		fprintf(stderr, "%d: %s: not found\n",getpid(), args[0]);
+		print_error(shell_name, line, args[0]);
 		free(buffer);
 		free(args);
 		free(replaced_command);
-		return (-1);
+		return (127);
 	}
 
 	status = call_fork(buffer, args, command_path);
 	free(command_path);
+
 
 	for (i = 0; args[i] != NULL; i++)
 		free(args[i]);
@@ -51,13 +50,15 @@ int handle_exec(char *buffer, int last_status)
  * Return: 0
  */
 int handle_input(char *current_dir, char *envp[], Alias *aliases,
-		int *num_aliases, int last_status)
+		int *num_aliases, int last_status, char *shell_name)
 {
 	char *buffer = NULL;
 	int is_interactive = isatty(STDIN_FILENO);
+	int line = 0;
 
 	while (1)
 	{
+		signal(SIGINT, sigint_handler);
 		if (is_interactive)
 		{
 			write(STDOUT_FILENO, ":)$ ", 4);
@@ -68,12 +69,13 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 			/*write(STDOUT_FILENO, "\n", 2);*/
 			break;
 		}
+		line++;
 		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#'
 				|| contains_only_spaces(buffer))
 			continue;
 		trim_spaces(buffer);
 		handle_comment(buffer);
-		exit_func(buffer);
+		exit_func(buffer, shell_name, &line);
 		env_builtin(buffer, envp);
 		if (strncmp(buffer, "setenv", 6) == 0)
 			setenv_builtin(buffer, &envp);
@@ -84,16 +86,19 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 		else if (strncmp(buffer, "cd", 2) == 0)
 			cd_builtin(buffer, &current_dir);
 		else if  (strstr(buffer, "&&") != NULL)
-			handle_logical_and(buffer, last_status);
+			last_status = handle_logical_and(buffer, last_status, shell_name, &line);
 		else if (strstr(buffer, "||") != NULL)
-			handle_logical_or(buffer, last_status);
+			last_status = handle_logical_or(buffer, last_status, shell_name, &line);
 		else if (strstr(buffer, ";") != NULL)
-			handle_semicolon(buffer, last_status);
+			last_status = handle_semicolon(buffer, last_status, shell_name, &line);
 		else
-			last_status = handle_exec(buffer, last_status);
+			last_status = handle_exec(buffer, last_status, shell_name, &line);
+
+		if (last_status && is_interactive == 0)
+			exit(last_status);
 	}
 	free(buffer);
-	return (0);
+	return (last_status);
 }
 
 /**
@@ -107,11 +112,12 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 int main(int argc, char *argv[], char *envp[])
 {
 	char *home_dir = "/home/username", *current_dir = NULL, *line = NULL;
-	int last_status = 0, num_aliases = 0;
-	size_t len = 0;
-	ssize_t read;
+	int last_status = 0, num_aliases = 0, line2 = 1, file_descriptor;
+	size_t buffer_size = 0;
+	ssize_t read_result;
 	Alias aliases[MAX_ALIASES];
-
+	char *shell_name = argv[0];
+	
 	current_dir = strdup(home_dir);
 	if (current_dir == NULL)
 	{
@@ -120,26 +126,35 @@ int main(int argc, char *argv[], char *envp[])
 	}
 	if (argc > 1)
 	{
-		FILE *file = fopen(argv[1], "r");
-
-		if (file == NULL)
+		file_descriptor = open(argv[1], O_RDONLY);
+		if (file_descriptor == -1)
 		{
-			perror("Error opening file");
-			return (1);
+			print_error2(shell_name, argv[1]);
+			return (2);
 		}
-		while ((read = getline(&line, &len, file)) != -1)
+		while ((read_result = read_line(file_descriptor, &line, &buffer_size)) != -1)
 		{
+			if (strlen(line) == 0)
+				break;
 			line[strcspn(line, "\n")] = '\0';
-			if (strlen(line) == 0 || isspace((unsigned char)line[0]) || line[0] == '#')
+			if (read_result == 0 || isspace((unsigned char)line[0]) || line[0] == '#')
 				continue;
-			handle_input2(line, current_dir, envp, aliases,
-					&num_aliases, last_status);
+			line2++;
+			handle_input2(line, current_dir, envp, aliases, &num_aliases, last_status, shell_name, &line2);
 		}
+
 		free(line);
-		fclose(file);
+		close(file_descriptor);
 	}
 	else
-		handle_input(current_dir, envp, aliases, &num_aliases, last_status);
+	{
+		last_status = handle_input(current_dir, envp, aliases, &num_aliases, last_status, shell_name);
+		if (last_status)
+		{
+			exit(last_status);
+		}
+	}
+
 	/*free(current_dir);*/
 	return (0);
 }
@@ -155,10 +170,10 @@ int main(int argc, char *argv[], char *envp[])
  *
  */
 void handle_input2(char *buffer, char *current_dir, char *envp[],
-		Alias *aliases, int *num_aliases, int last_status)
+		Alias *aliases, int *num_aliases, int last_status, char *shell_name , int *line2)
 {
 	handle_comment(buffer);
-	exit_func(buffer);
+	exit_func(buffer, shell_name, line2);
 	env_builtin(buffer, envp);
 	if (strncmp(buffer, "setenv", 6) == 0)
 		setenv_builtin(buffer, &envp);
@@ -169,11 +184,11 @@ void handle_input2(char *buffer, char *current_dir, char *envp[],
 	else if (strncmp(buffer, "cd", 2) == 0)
 		cd_builtin(buffer, &current_dir);
 	else if  (strstr(buffer, "&&") != NULL)
-		handle_logical_and(buffer, last_status);
+		handle_logical_and(buffer, last_status, shell_name, line2);
 	else if (strstr(buffer, "||") != NULL)
-		handle_logical_or(buffer, last_status);
+		handle_logical_or(buffer, last_status, shell_name, line2);
 	else if (strstr(buffer, ";") != NULL)
-		handle_semicolon(buffer, last_status);
+		handle_semicolon(buffer, last_status, shell_name, line2);
 	else
-		last_status = handle_exec(buffer, last_status);
+		last_status = handle_exec(buffer, last_status, shell_name, line2);
 }

@@ -1,5 +1,10 @@
 #include "shell.h"
 
+void sigint_handler(int signum)
+{
+	(void)signum;
+	write(STDOUT_FILENO, "\n:)$ ", 5);
+}
 /**
  * getline_inp - Gets command lines from standard input
  * @buffer: Where inputs are stored

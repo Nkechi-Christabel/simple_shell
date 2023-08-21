@@ -6,7 +6,7 @@
  * @buffer: contains the command
  *
  */
-void exit_func(char *buffer)
+void exit_func(char *buffer, char *shell_name, int *line)
 {
 	if (strncmp(buffer, "exit", 4) == 0)
 	{
@@ -32,9 +32,10 @@ void exit_func(char *buffer)
 
 		if(!isNum)
 		{
-			exit_invalid_argument_error(arg);
+			print_error3(shell_name, line, arg);
+			/*exit_invalid_argument_error(arg);*/
 			free(buffer);
-			exit(EXIT_FAILURE);
+			exit(2);
 		}
 
 		status = atoi(arg);
@@ -63,7 +64,20 @@ void exit_invalid_argument_error(const char *arg)
 	write(STDERR_FILENO, arg, strlen(arg));
 	write(STDERR_FILENO, "\n", 1);
 }
+void print_error3(char *shell_name, int *line, char *command)
+{
+	char number_str[20];
+	intToString((*line), number_str);
 
+	write(STDERR_FILENO, shell_name, strlen(shell_name));
+	write(STDERR_FILENO, ": ", 2);
+	write(STDERR_FILENO,  number_str, strlen(number_str));
+	write(STDERR_FILENO, ": ", 2);
+	write(STDERR_FILENO, "exit: ", 6);
+	write(STDERR_FILENO, "Illegal number: ", 16);
+	write(STDERR_FILENO, command, strlen(command));
+	write(STDERR_FILENO, "\n", 1);
+}
 /**
  * negative_status_error - Prints an error message for a negative exit status.
  *
@@ -158,13 +172,8 @@ char *find_path_env(void)
 char *find_executable_path(const char *cmd)
 {
 	char *path_copy, *dir, *full_path, *abs_path;
-	char *path = find_path_env();
+	char *path;
 
-	if (path == NULL)
-		return (NULL);
-
-	path_copy = strdup(path);
-	dir = _strtok(path_copy, ":");
 	if (access(cmd, X_OK) == 0)
 	{
 		abs_path = strdup(cmd);
@@ -173,9 +182,13 @@ char *find_executable_path(const char *cmd)
 			perror("Memory allocation failed");
 			exit(EXIT_FAILURE);
 		}
-		free(path_copy);
 		return (abs_path);
 	}
+	path = find_path_env();
+	if (path == NULL)
+		return (NULL);
+	path_copy = strdup(path);
+	dir = _strtok(path_copy, ":");
 	while (dir != NULL)
 	{
 		full_path = (char *)malloc(strlen(dir) + strlen(cmd) + 2);

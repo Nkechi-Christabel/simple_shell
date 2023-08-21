@@ -9,6 +9,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 extern char **environ;
 
@@ -26,7 +30,7 @@ void env_builtin(char *buffer, char **envp);
 char **tokens(char *buffer);
 void exit_invalid_argument_error(const char *arg);
 void exit_negative_status_error(int status);
-void exit_func(char *buffer);
+void exit_func(char *buffer, char *shell_name, int *line);
 int call_fork(char *buffer, char **args, char *command_path);
 ssize_t _getline(char **lineptr, size_t *n, FILE *stream);
 char *_strtok(char *str, const char *delim);
@@ -35,10 +39,10 @@ char *find_executable_path(const char *cmd);
 void setenv_builtin(char *buffer, char ***envp);
 void unsetenv_builtin(char *buffer, char ***envp);
 void cd_builtin(char *buffer, char **current_dir);
-int handle_exec(char *buffer, int last_status);
-void handle_logical_and(char *cmd, int last_status);
-void handle_logical_or(char *cmd, int last_status);
-void handle_semicolon(char *buffer, int last_status);
+int handle_exec(char *buffer, int last_status, char *shell_name, int *line);
+int handle_logical_and(char *cmd, int last_status, char *shell_name, int *line);
+int handle_logical_or(char *cmd, int last_status, char *shell_name, int *line);
+int handle_semicolon(char *buffer, int last_status, char *shell_name, int *line);
 void print_string(const char *str);
 void list_aliases(Alias *aliases, int num_aliases);
 void create_or_modify_alias(const char *token, Alias *aliases,
@@ -55,10 +59,17 @@ char *echo_path(char *result, size_t *len, const char *var_name_start);
 size_t get_variable_name_length(const char *var_name_start);
 void handle_comment(char *buffer);
 void handle_input2(char *buffer, char *current_dir, char *envp[], Alias *aliases,
-		int *num_aliases, int last_status);
+		int *num_aliases, int last_status, char *shell_name, int *line2);
 int _setenv(const char *name, const char *value, int overwrite);
 int _unsetenv(const char *name);
 int contains_only_spaces(const char *str);
 void trim_spaces(char *str);
+void print_error(char *shell_name, int *line, char *command);
+void print_error2(char *shell_name, char *command);
+void reverseString(char str[], int length);
+char* intToString(int num, char* str);
+void sigint_handler(int signum);
+void print_error3(char *shell_name, int *line, char *command);
+ssize_t read_line(int fd, char **line, size_t *buffer_size);
 
 #endif /* SHELL_H */

@@ -31,7 +31,7 @@ int call_fork(char *buffer, char **args, char *command_path)
 		free(buffer);
 		free(command_path);
 		free(args);
-		_exit(EXIT_FAILURE);
+		exit(127);
 	}
 	if (waitpid(pid, &status, 0) == -1)
 	{
@@ -41,7 +41,14 @@ int call_fork(char *buffer, char **args, char *command_path)
 		free(args);
 		exit(EXIT_FAILURE);
 	}
-	return (WIFEXITED(status) ? WEXITSTATUS(status) : -1);
+	if (WIFEXITED(status))
+	{
+		return WEXITSTATUS(status);
+	}
+	else
+	{
+		return -1;
+	}
 }
 
 /**

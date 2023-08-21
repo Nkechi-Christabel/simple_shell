@@ -15,3 +15,64 @@ void trim_spaces(char *str)
     
     str[end - start + 1] = '\0';
 }
+
+void print_error(char *shell_name, int *line, char *command)
+{
+	char number_str[20];
+	intToString((*line), number_str);
+
+	write(STDERR_FILENO, shell_name, strlen(shell_name));
+	write(STDERR_FILENO, ": ", 2);
+	write(STDERR_FILENO,  number_str, strlen(number_str));
+	write(STDERR_FILENO, ": ", 2);
+	write(STDERR_FILENO, command, strlen(command));
+	write(STDERR_FILENO, ": not found\n", 12);
+}
+
+void reverseString(char str[], int length) {
+    int start = 0;
+    int end = length - 1;
+
+    while (start < end) {
+        char temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        start++;
+        end--;
+    }
+}
+
+char* intToString(int num, char* str) {
+    int isNegative = 0;
+    int i = 0;
+
+    if (num < 0) {
+        isNegative = 1;
+        num = -num;
+    }
+
+    while (num != 0) {
+        str[i++] = num % 10 + '0';
+        num = num / 10;
+    }
+
+    if (isNegative) {
+        str[i++] = '-';
+    }
+
+    str[i] = '\0';
+
+    reverseString(str, i);
+
+    return str;
+}
+
+void print_error2(char *shell_name, char *command)
+{
+	write(STDERR_FILENO, shell_name, strlen(shell_name));
+	write(STDERR_FILENO, ": ", 2);
+	write(STDERR_FILENO, "0: ", 3);
+	write(STDERR_FILENO, "cannot open ", 12);
+	write(STDERR_FILENO, command, strlen(command));
+	write(STDERR_FILENO, ": No such file\n", 15);
+}
