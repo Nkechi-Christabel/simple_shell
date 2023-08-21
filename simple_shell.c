@@ -19,9 +19,11 @@ int handle_exec(char *buffer, int last_status)
 	command_path = find_executable_path(args[0]);
 	if (command_path == NULL)
 	{
-		/*ite(STDERR_FILENO, args[0], strlen(args[0]));
-		perror("Command not found");*/
-		fprintf(stderr, "%d: %s: not found\n",getpid(), args[0]);
+		/**
+		  * ite(STDERR_FILENO, args[0], strlen(args[0]));
+		  *perror("Command not found");
+		  */
+		fprintf(stderr, "%d: %s: not found\n", getpid(), args[0]);
 		free(buffer);
 		free(args);
 		free(replaced_command);
@@ -64,10 +66,7 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 			fflush(stdout);
 		}
 		if (getline_inp(&buffer) == -1)
-		{
-			/*write(STDOUT_FILENO, "\n", 2);*/
 			break;
-		}
 		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#'
 				|| contains_only_spaces(buffer))
 			continue;

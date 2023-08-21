@@ -14,6 +14,7 @@ extern char **environ;
 
 #define BUFFER_SIZE 1024
 #define MAX_ALIASES 50
+#define HISTORY_SIZE 10
 
 typedef struct {
     char *name;
