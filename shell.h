@@ -18,6 +18,7 @@ extern char **environ;
 
 #define BUFFER_SIZE 1024
 #define MAX_ALIASES 50
+#define HISTORY_SIZE 10
 
 typedef struct {
     char *name;
@@ -71,5 +72,6 @@ char* intToString(int num, char* str);
 void sigint_handler(int signum);
 void print_error3(char *shell_name, int *line, char *command);
 ssize_t read_line(int fd, char **line, size_t *buffer_size);
+char *_getenv(void);
 
 #endif /* SHELL_H */

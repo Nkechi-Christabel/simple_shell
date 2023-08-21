@@ -65,10 +65,7 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 			fflush(stdout);
 		}
 		if (getline_inp(&buffer) == -1)
-		{
-			/*write(STDOUT_FILENO, "\n", 2);*/
 			break;
-		}
 		line++;
 		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#'
 				|| contains_only_spaces(buffer))

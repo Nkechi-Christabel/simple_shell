@@ -52,6 +52,32 @@ int call_fork(char *buffer, char **args, char *command_path)
 }
 
 /**
+ * find_path_env - finds the PATH environment variable
+ *
+ * Return: path or NULL if not found
+ */
+char *_getenv(void)
+{
+	char *path = NULL;
+	char **env = environ;
+
+	for (; *env != NULL; env++)
+	{
+		if (strncmp(*env, "HOME=", 5) == 0)
+		{
+			path = *env + 5;
+			break;
+		}
+	}
+	if (path == NULL)
+	{
+		perror("PATH environment variable not found");
+		return (NULL);
+	}
+	return (strdup(path));
+}
+
+/**
  * cd_builtin - Handles the "cd" command
  * @buffer: Input buffer to extract command and argument
  * @current_dir: The current directory
@@ -59,9 +85,8 @@ int call_fork(char *buffer, char **args, char *command_path)
 void cd_builtin(char *buffer, char **current_dir)
 {
 	char *token, *dir, *new_dir = NULL;
-	size_t max_len = 1024;
 
-	new_dir = (char *)malloc(max_len);
+	new_dir = (char *)malloc(BUFFER_SIZE);
 
 	if (new_dir == NULL)
 	{
@@ -71,9 +96,14 @@ void cd_builtin(char *buffer, char **current_dir)
 
 	token = _strtok(buffer, " ");
 	token = _strtok(NULL, " ");
+	
+	if (token == NULL || token[0] == '\0')
+		dir = getenv("HOME");
 
-	if (token == NULL || token[0] == '\0' || strcmp(token, "-") == 0)
+	else if (strcmp(token, "-") == 0)
 		dir = *current_dir;
+	else if (strcmp(token, "~") == 0)
+		dir = getenv("HOME");
 	else
 		dir = token;
 
@@ -84,13 +114,12 @@ void cd_builtin(char *buffer, char **current_dir)
 		return;
 	}
 
-	if (getcwd(new_dir, max_len) == NULL)
+	if (getcwd(new_dir, BUFFER_SIZE) == NULL)
 	{
 		perror("getcwd");
 		free(new_dir);
 		return;
 	}
-
 	*current_dir = new_dir;
 }
 
@@ -106,6 +135,8 @@ void handle_comment(char *buffer)
 	if (comment_start != NULL)
 		*comment_start = '\0';
 }
+
+
 /**
  * contains_only_spaces - checks for space
  *

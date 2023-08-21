@@ -211,4 +211,3 @@ char *find_executable_path(const char *cmd)
 	free(path_copy);
 	return (NULL);
 }
-
