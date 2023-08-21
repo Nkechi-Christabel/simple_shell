@@ -45,46 +45,95 @@ int call_fork(char *buffer, char **args, char *command_path)
 }
 
 /**
+ * find_path_env - finds the PATH environment variable
+ *
+ * Return: path or NULL if not found
+ */
+char *_getenv(void)
+{
+	char *path = NULL;
+	char **env = environ;
+
+	for (; *env != NULL; env++)
+	{
+		if (strncmp(*env, "HOME=", 5) == 0)
+		{
+			path = *env + 5;
+			break;
+		}
+	}
+	if (path == NULL)
+	{
+		perror("PATH environment variable not found");
+		return (NULL);
+	}
+	return (strdup(path));
+}
+
+/**
  * cd_builtin - Handles the "cd" command
  * @buffer: Input buffer to extract command and argument
  * @current_dir: The current directory
  */
 void cd_builtin(char *buffer, char **current_dir)
 {
-	char *token, *dir, *new_dir = NULL;
-	size_t max_len = 1024;
+	  char *token, *dir, *new_dir = NULL;
+    size_t max_len = 1024;
 
-	new_dir = (char *)malloc(max_len);
+    new_dir = (char *)malloc(max_len);
 
-	if (new_dir == NULL)
-	{
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	}
+    if (new_dir == NULL)
+    {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
 
-	token = _strtok(buffer, " ");
-	token = _strtok(NULL, " ");
+    token = strtok(buffer, " ");
+    token = strtok(NULL, " ");
 
-	if (token == NULL || token[0] == '\0' || strcmp(token, "-") == 0)
-		dir = *current_dir;
-	else
-		dir = token;
+    if (token != NULL && token[0] != '\0')
+    {
+        if (strcmp(token, "-") == 0)
+        {
+            if (*current_dir == NULL)
+            {
+                perror("No previous directory available.");
+                free(new_dir);
+                return;
+            }
 
-	if (chdir(dir) == -1)
-	{
-		perror("cd");
-		free(new_dir);
-		return;
-	}
+            dir = *current_dir;
+        }
+        else if (strcmp(token, "~") == 0)
+        {
+            dir = _getenv(); 
+        }
+        else
+        {
+            dir = token;
+        }
+    }
+    else
+    {
+        dir = _getenv(); 
+    }
 
-	if (getcwd(new_dir, max_len) == NULL)
-	{
-		perror("getcwd");
-		free(new_dir);
-		return;
-	}
+    if (chdir(dir) == -1)
+    {
+        perror("chdir");
+        free(new_dir);
+        return;
+    }
 
-	*current_dir = new_dir;
+    if (getcwd(new_dir, max_len) == NULL)
+    {
+        perror("getcwd");
+        free(new_dir);
+        return;
+    }
+
+    free(*current_dir);
+    *current_dir = new_dir;
 }
 
 /**

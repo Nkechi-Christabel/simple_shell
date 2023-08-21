@@ -127,7 +127,7 @@ int main(int argc, char *argv[], char *envp[])
 			perror("Error opening file");
 			return (1);
 		}
-		while ((read = getline(&line, &len, file)) != -1)
+		while ((read = _getline(&line, &len, file)) != -1)
 		{
 			line[strcspn(line, "\n")] = '\0';
 			if (strlen(line) == 0 || isspace((unsigned char)line[0]) || line[0] == '#')
