@@ -73,9 +73,11 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#'
 				|| contains_only_spaces(buffer))
 			continue;
-
-		last_status = handle_input2(buffer, current_dir, envp, aliases,
-				num_aliases, last_status, shell_name, &line);
+		if (strncmp(buffer, "setenv", 6) == 0)
+			setenv_builtin(buffer, &envp);
+		else
+			last_status = handle_input2(buffer, current_dir, envp, aliases,
+					num_aliases, last_status, shell_name, &line);
 
 		if (last_status && is_interactive == 0)
 			exit(last_status);

@@ -21,13 +21,13 @@ extern char **environ;
 #define HISTORY_SIZE 10
 
 /**
- * typedef struct - structure for alias
+ * struct Alias - Typedef structure for alias
  *
  * @name: name of alias
  * @value: value of alias
  * Alias - is the typedef name
  */
-typedef struct
+typedef struct Alias
 {
 	char *name;
 	char *value;
