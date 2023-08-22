@@ -17,17 +17,25 @@ int handle_semicolon(char *buffer, int last_status, char *shell_name,
 	size_t len;
 	int status;
 
-	command = strtok(buffer, ";");
-	while (command != NULL)
+	command = buffer;
+	while (*command != '\0')
 	{
-		trim_cmd = command;
+		char *semicolon = strstr(command, ";");
+
+		if (semicolon != NULL)
+		{
+			*semicolon = '\0';
+			trim_cmd = command;
+		}
+		else
+			trim_cmd = command;
 
 		while (*trim_cmd == ' ' || *trim_cmd == '\t' || *trim_cmd == '\n')
 			trim_cmd++;
+
 		len = strlen(trim_cmd);
 
-		while (len > 0 && (trim_cmd[len - 1] == ' ' ||
-			trim_cmd[len - 1] == '\t' || trim_cmd[len - 1] == '\n'))
+		while (len > 0 && (trim_cmd[len - 1] == ' ' || trim_cmd[len - 1] == '\t' || trim_cmd[len - 1] == '\n'))
 		{
 			trim_cmd[len - 1] = '\0';
 			len--;
@@ -36,8 +44,12 @@ int handle_semicolon(char *buffer, int last_status, char *shell_name,
 		{
 			status = handle_exec(trim_cmd, last_status, shell_name, line);
 		}
-
-		command = strtok(NULL, ";");
+		if (semicolon != NULL)
+		{
+			command = semicolon + 1;
+		}
+		else
+			break;
 	}
 
 	return (status);

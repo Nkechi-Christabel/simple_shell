@@ -78,6 +78,7 @@ void print_error3(char *shell_name, int *line, char *command)
  * env_builtin - Print the current environment variables
  * @envp: Array of environment variables
  */
+
 void env_builtin(char **envp)
 {
 	const char *desired_order[] = {

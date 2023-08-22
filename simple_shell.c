@@ -59,23 +59,30 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 	char *buffer = NULL;
 	int is_interactive = isatty(STDIN_FILENO), line = 0;
 
+	signal(SIGINT, sigint_handler);
 	while (1)
 	{
-		signal(SIGINT, sigint_handler);
 		if (is_interactive)
 		{
 			write(STDOUT_FILENO, ":)$ ", 4);
 			fflush(stdout);
 		}
 		if (getline_inp(&buffer) == -1)
+		{
+			if (is_interactive)
+				write(STDIN_FILENO, "\n", 1);
 			break;
+		}
 		line++;
 		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#'
 				|| contains_only_spaces(buffer))
 			continue;
 
-		last_status = handle_input2(buffer, current_dir, envp, aliases,
-				num_aliases, last_status, shell_name, &line);
+		if (strncmp(buffer, "setenv", 6) == 0)
+			setenv_builtin(buffer, &envp);
+		else
+			last_status = handle_input2(buffer, current_dir, envp,
+			aliases, num_aliases, last_status, shell_name, &line);
 
 		if (last_status && is_interactive == 0)
 			exit(last_status);

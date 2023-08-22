@@ -62,9 +62,7 @@ ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 	}
 	while (1)
 	{
-		size_t read_result = read_buffer(buffer, &buffer_pos, &buffer_size, stream);
-
-		if (read_result == 0)
+		if (read_buffer(buffer, &buffer_pos, &buffer_size, stream) == 0)
 		{
 			if (pos == 0)
 				return (-1);
@@ -79,7 +77,10 @@ ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 			*n *= 2;
 			new_ptr = (char *)realloc(*lineptr, *n);
 			if (new_ptr == NULL)
+			{
+				free(*lineptr);
 				return (-1);
+			}
 			*lineptr = new_ptr;
 		}
 	}
