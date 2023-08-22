@@ -12,7 +12,9 @@ void exit_func(char *buffer, char *shell_name, int *line)
 	{
 		int status, i = 0, isNum;
 		char *arg = buffer + 4;
-
+		
+		if (*arg == '\0')
+			exit(0);
 		while (*arg == ' ')
 			arg++;
 

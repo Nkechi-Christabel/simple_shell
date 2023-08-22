@@ -69,27 +69,10 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#'
 				|| contains_only_spaces(buffer))
 			continue;
-		trim_spaces(buffer);
-		handle_comment(buffer);
-		exit_func(buffer, shell_name, &line);
-		if (strncmp(buffer, "setenv", 6) == 0)
-			setenv_builtin(buffer, &envp);
-		else if (strncmp(buffer, "env", 3) == 0)
-			env_builtin(envp);
-		else if (strncmp(buffer, "unsetenv", 8) == 0)
-			unsetenv_builtin(buffer, &envp);
-		else if (strncmp(buffer, "alias", 5) == 0)
-			alias_builtin(buffer, aliases, num_aliases);
-		else if (strncmp(buffer, "cd", 2) == 0)
-			cd_builtin(buffer, &current_dir);
-		else if  (strstr(buffer, "&&") != NULL)
-			last_status = handle_logical_and(buffer, last_status, shell_name, &line);
-		else if (strstr(buffer, "||") != NULL)
-			last_status = handle_logical_or(buffer, last_status, shell_name, &line);
-		else if (strstr(buffer, ";") != NULL)
-			last_status = handle_semicolon(buffer, last_status, shell_name, &line);
-		else
-			last_status = handle_exec(buffer, last_status, shell_name, &line);
+
+		last_status = handle_input2(buffer, current_dir, envp, aliases,
+				num_aliases, last_status, shell_name, &line);
+
 		if (last_status && is_interactive == 0)
 			exit(last_status);
 	}
@@ -129,8 +112,8 @@ int main(int argc, char *argv[], char *envp[])
 			if (read_result == 0 || isspace((unsigned char)line[0]) || line[0] == '#')
 				continue;
 			line2++;
-			handle_input2(line, current_dir, envp, aliases,
-					&num_aliases, last_status, shell_name, &line2);
+			last_status = handle_input2(line, current_dir, envp,
+					aliases, &num_aliases, last_status, shell_name, &line2);
 		}
 		free(line);
 		close(file_descriptor);
@@ -156,14 +139,17 @@ int main(int argc, char *argv[], char *envp[])
  * @last_status: contains the last exit status
  *
  */
-void handle_input2(char *buffer, char *current_dir, char *envp[],
-		Alias *aliases, int *num_aliases, int last_status, char *shell_name , int *line2)
+int handle_input2(char *buffer, char *current_dir, char *envp[],
+		Alias *aliases, int *num_aliases, int last_status,
+		char *shell_name, int *line)
 {
+	trim_spaces(buffer);
 	handle_comment(buffer);
-	exit_func(buffer, shell_name, line2);
-	env_builtin(envp);
+	exit_func(buffer, shell_name, line);
 	if (strncmp(buffer, "setenv", 6) == 0)
 		setenv_builtin(buffer, &envp);
+	else if (strncmp(buffer, "env", 3) == 0)
+		env_builtin(envp);
 	else if (strncmp(buffer, "unsetenv", 8) == 0)
 		unsetenv_builtin(buffer, &envp);
 	else if (strncmp(buffer, "alias", 5) == 0)
@@ -171,11 +157,13 @@ void handle_input2(char *buffer, char *current_dir, char *envp[],
 	else if (strncmp(buffer, "cd", 2) == 0)
 		cd_builtin(buffer, &current_dir);
 	else if  (strstr(buffer, "&&") != NULL)
-		handle_logical_and(buffer, last_status, shell_name, line2);
+		last_status = handle_logical_and(buffer, last_status, shell_name, line);
 	else if (strstr(buffer, "||") != NULL)
-		handle_logical_or(buffer, last_status, shell_name, line2);
+		last_status = handle_logical_or(buffer, last_status, shell_name, line);
 	else if (strstr(buffer, ";") != NULL)
-		handle_semicolon(buffer, last_status, shell_name, line2);
+		last_status = handle_semicolon(buffer, last_status, shell_name, line);
 	else
-		last_status = handle_exec(buffer, last_status, shell_name, line2);
+		last_status = handle_exec(buffer, last_status, shell_name, line);
+	
+	return (last_status);
 }
