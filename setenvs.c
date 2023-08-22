@@ -2,6 +2,40 @@
 #include "shell.h"
 
 /**
+ * _putenv - Sets a new or modify an environment variable
+ * @str: The name of the environment variable to set or modify
+ *
+ * Return: 0 if successful or -1 if not
+ */
+
+int _putenv(const char *str)
+{
+	char *env_str = strdup(str), *equal_sign;
+	int result;
+
+	if (env_str == NULL)
+	{
+		perror("Memory allocation error");
+		return (-1);
+	}
+
+	equal_sign = strchr(env_str, '=');
+
+	if (equal_sign == NULL)
+	{
+		free(env_str);
+		return (-1);
+	}
+
+	*equal_sign = '\0';
+
+	result = setenv(env_str, equal_sign + 1, 1);
+
+	free(env_str);
+	return (result);
+}
+
+/**
  * _setenv - Set or modify an environment variable
  * @name: Name of the environment variable
  * @value: Value to be assigned to the environment variable
@@ -18,7 +52,7 @@ int _setenv(const char *name, const char *value, int overwrite)
 	if (name == NULL || name[0] == '\0' || strchr(name, '=') != NULL)
 		return (-1);
 
-	if (!overwrite && getenv(name) != NULL)
+	if (!overwrite && _getenv(name) != NULL)
 		return (0);
 
 	len = strlen(name) + strlen(value) + 2;
@@ -32,9 +66,9 @@ int _setenv(const char *name, const char *value, int overwrite)
 	strcat(new_var, "=");
 	strcat(new_var, value);
 
-	result = putenv(new_var);
+	result = _putenv(new_var);
 
-    return (result);
+	return (result);
 }
 
 /**
@@ -66,7 +100,7 @@ void setenv_builtin(char *buffer, char ***envp)
 
 	var_value = token;
 
-	if (setenv(var_name, var_value, 1) == -1)
+	if (_setenv(var_name, var_value, 1) == -1)
 		perror("setenv");
 	else
 		*envp = environ;
@@ -80,31 +114,26 @@ void setenv_builtin(char *buffer, char ***envp)
  */
 int _unsetenv(const char *name)
 {
-	char **env, **new_env;
-	int new_idx;
-	size_t count = 0;
+	int index = -1;
+	int i;
 
-	if (name == NULL || name[0] == '\0' || strchr(name, '=') != NULL)
-		return -1;
+	for (i = 0; environ[i] != NULL; i++)
+	{
+		if (strncmp(name, environ[i], strlen(name)) == 0 &&
+				environ[i][strlen(name)] == '=')
+		{
+			index = i;
+			break;
+		}
+	}
 
-	for (env = environ; *env != NULL; ++env)
-		if (strncmp(*env, name, strlen(name)) != 0 || (*env)[strlen(name)] != '=')
-			++count;
-	new_env = (char **)malloc((count + 1) * sizeof(char *));
-
-	if (new_env == NULL)
-		return -1;
-
-	new_idx = 0;
-
-	for (env = environ; *env != NULL; ++env)
-		if (strncmp(*env, name, strlen(name)) != 0 || (*env)[strlen(name)] != '=')
-			new_env[new_idx++] = *env;
-
-	new_env[new_idx] = NULL;
-	environ = new_env;
-
-	return (0);
+	if (index != -1)
+	{
+		for (i = index; environ[i] != NULL; i++)
+			environ[i] = environ[i + 1];
+		return (0);
+	}
+	return (-1);
 }
 
 /**
@@ -125,7 +154,7 @@ void unsetenv_builtin(char *buffer, char ***envp)
 		return;
 	}
 
-	if (unsetenv(token) == -1)
+	if (_unsetenv(token) == -1)
 		perror("unsetenv");
 	else
 		*envp = environ;

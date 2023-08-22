@@ -35,7 +35,8 @@ int handle_semicolon(char *buffer, int last_status, char *shell_name,
 
 		len = strlen(trim_cmd);
 
-		while (len > 0 && (trim_cmd[len - 1] == ' ' || trim_cmd[len - 1] == '\t' || trim_cmd[len - 1] == '\n'))
+		while (len > 0 && (trim_cmd[len - 1] == ' ' ||
+			trim_cmd[len - 1] == '\t' || trim_cmd[len - 1] == '\n'))
 		{
 			trim_cmd[len - 1] = '\0';
 			len--;
@@ -51,7 +52,6 @@ int handle_semicolon(char *buffer, int last_status, char *shell_name,
 		else
 			break;
 	}
-
 	return (status);
 }
 
