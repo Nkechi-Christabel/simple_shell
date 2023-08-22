@@ -24,9 +24,9 @@ void list_aliases(Alias *aliases, int num_aliases)
 	for (i = 0; i < num_aliases; i++)
 	{
 		print_string(aliases[i].name);
-		print_string("=");
+		print_string("='");
 		print_string(aliases[i].value);
-		print_string("\n");
+		print_string("'\n");
 	}
 }
 
@@ -111,9 +111,9 @@ void alias_builtin(char *buffer, Alias *aliases, int *num_aliases)
 		else
 		{
 			print_string(aliases[alias_index].name);
-			print_string("=");
+			print_string("='");
 			print_string(aliases[alias_index].value);
-			print_string("\n");
+			print_string("'\n");
 		}
 
 		free(command);
