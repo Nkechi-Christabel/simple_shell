@@ -27,7 +27,7 @@ typedef struct {
 
 
 ssize_t getline_inp(char **buffer);
-void env_builtin(char *buffer, char **envp);
+void env_builtin(char **envp);
 char **tokens(char *buffer);
 void exit_invalid_argument_error(const char *arg);
 void exit_negative_status_error(int status);
@@ -35,7 +35,6 @@ void exit_func(char *buffer, char *shell_name, int *line);
 int call_fork(char *buffer, char **args, char *command_path);
 ssize_t _getline(char **lineptr, size_t *n, FILE *stream);
 char *_strtok(char *str, const char *delim);
-char *find_path_env(void);
 char *find_executable_path(const char *cmd);
 void setenv_builtin(char *buffer, char ***envp);
 void unsetenv_builtin(char *buffer, char ***envp);
@@ -72,6 +71,6 @@ char* intToString(int num, char* str);
 void sigint_handler(int signum);
 void print_error3(char *shell_name, int *line, char *command);
 ssize_t read_line(int fd, char **line, size_t *buffer_size);
-char *_getenv(void);
+char *_getenv(const char *name);
 
 #endif /* SHELL_H */

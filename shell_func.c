@@ -33,7 +33,6 @@ void exit_func(char *buffer, char *shell_name, int *line)
 		if(!isNum)
 		{
 			print_error3(shell_name, line, arg);
-			/*exit_invalid_argument_error(arg);*/
 			free(buffer);
 			exit(2);
 		}
@@ -56,14 +55,6 @@ void exit_func(char *buffer, char *shell_name, int *line)
  *
  * @arg: The invalid argument passed to the exit command.
  */
-void exit_invalid_argument_error(const char *arg)
-{
-	const char error_message[] = "Invalid exit argument: ";
-
-	write(STDERR_FILENO, error_message, sizeof(error_message) - 1);
-	write(STDERR_FILENO, arg, strlen(arg));
-	write(STDERR_FILENO, "\n", 1);
-}
 void print_error3(char *shell_name, int *line, char *command)
 {
 	char number_str[20];
@@ -117,50 +108,77 @@ void exit_negative_status_error(int status)
  * @envp: Array of environment variables
  * @buffer: contains the command
  */
-void env_builtin(char *buffer, char **envp)
+void env_builtin(char **envp)
 {
-	int i = 0;
-	size_t len;
+	const char *desired_order[] = {
+		"LESSOPEN", "USER", "SHLVL", "MOTD_SHOWN", "HOME", "OLDPWD",
+		"WSL_DISTRO_NAME", "LOGNAME", "NAME", "_", "TERM", "PATH", "LANG",
+		"LS_COLORS", "SHELL", "LESSCLOSE", "PWD", "XDG_DATA_DIRS",
+		"HOSTTYPE", "WSLENV",
+		NULL
+	};
+	int i, j, found;
+	char **env_var, **rem;
 
-	if (strcmp(buffer, "env") == 0)
+	for (i = 0; desired_order[i] != NULL; i++)
 	{
-		while (envp[i] != NULL)
+		for (env_var = envp; *env_var != NULL; env_var++)
 		{
-			len = strlen(envp[i]);
-
-			write(STDOUT_FILENO, envp[i], len);
+			if (strncmp(*env_var, desired_order[i], strlen(desired_order[i])) == 0)
+			{
+				write(STDOUT_FILENO, *env_var, strlen(*env_var));
+				write(STDOUT_FILENO, "\n", 1);
+				break;
+			}
+		}
+	}
+	for (rem = envp; *rem != NULL; rem++)
+	{
+		found = 0;
+		for (j = 0; desired_order[j] != NULL; j++)
+		{
+			if (strncmp(*rem, desired_order[j], strlen(desired_order[j])) == 0)
+			{
+				found = 1;
+				break;
+			}
+		}
+		if (!found)
+		{
+			write(STDOUT_FILENO, *rem, strlen(*rem));
 			write(STDOUT_FILENO, "\n", 1);
-			i++;
 		}
 	}
 }
 
 /**
- * find_path_env - finds the PATH environment variable
+ * _getenv- finds a vairable in environment variable
  *
- * Return: path or NULL if not found
+ * @name: variable to search for
+ *
+ * Return: *env + name_len + 1
  */
-char *find_path_env(void)
+char *_getenv(const char *name)
 {
-	char *path = NULL;
 	char **env = environ;
+	size_t name_len;
 
+	if (name == NULL || env == NULL)
+	{
+		return NULL;
+	}
+
+	name_len = strlen(name);
 	for (; *env != NULL; env++)
 	{
-		if (strncmp(*env, "PATH=", 5) == 0)
+		if (strncmp(name, *env, name_len) == 0 && (*env)[name_len] == '=')
 		{
-			path = *env + 5;
-			break;
+			return *env + name_len + 1;
 		}
 	}
-	if (path == NULL)
-	{
-		perror("PATH environment variable not found");
-		return (NULL);
-	}
-	return (strdup(path));
-}
 
+	return NULL;
+}
 
 /**
  * find_executable_path - finds the full executable path for a command
@@ -184,7 +202,7 @@ char *find_executable_path(const char *cmd)
 		}
 		return (abs_path);
 	}
-	path = find_path_env();
+	path = _getenv("PATH");
 	if (path == NULL)
 		return (NULL);
 	path_copy = strdup(path);

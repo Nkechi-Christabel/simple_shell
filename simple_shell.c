@@ -53,8 +53,7 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 		int *num_aliases, int last_status, char *shell_name)
 {
 	char *buffer = NULL;
-	int is_interactive = isatty(STDIN_FILENO);
-	int line = 0;
+	int is_interactive = isatty(STDIN_FILENO), line = 0;
 
 	while (1)
 	{
@@ -73,9 +72,10 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 		trim_spaces(buffer);
 		handle_comment(buffer);
 		exit_func(buffer, shell_name, &line);
-		env_builtin(buffer, envp);
 		if (strncmp(buffer, "setenv", 6) == 0)
 			setenv_builtin(buffer, &envp);
+		else if (strncmp(buffer, "env", 3) == 0)
+			env_builtin(envp);
 		else if (strncmp(buffer, "unsetenv", 8) == 0)
 			unsetenv_builtin(buffer, &envp);
 		else if (strncmp(buffer, "alias", 5) == 0)
@@ -90,7 +90,6 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 			last_status = handle_semicolon(buffer, last_status, shell_name, &line);
 		else
 			last_status = handle_exec(buffer, last_status, shell_name, &line);
-
 		if (last_status && is_interactive == 0)
 			exit(last_status);
 	}
@@ -108,19 +107,12 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
  */
 int main(int argc, char *argv[], char *envp[])
 {
-	char *home_dir = "/home/username", *current_dir = NULL, *line = NULL;
+	char *current_dir = "/home/username", *line = NULL, *shell_name = argv[0];
 	int last_status = 0, num_aliases = 0, line2 = 1, file_descriptor;
 	size_t buffer_size = 0;
 	ssize_t read_result;
 	Alias aliases[MAX_ALIASES];
-	char *shell_name = argv[0];
 	
-	current_dir = strdup(home_dir);
-	if (current_dir == NULL)
-	{
-		perror("strdup");
-		exit(EXIT_FAILURE);
-	}
 	if (argc > 1)
 	{
 		file_descriptor = open(argv[1], O_RDONLY);
@@ -137,21 +129,19 @@ int main(int argc, char *argv[], char *envp[])
 			if (read_result == 0 || isspace((unsigned char)line[0]) || line[0] == '#')
 				continue;
 			line2++;
-			handle_input2(line, current_dir, envp, aliases, &num_aliases, last_status, shell_name, &line2);
+			handle_input2(line, current_dir, envp, aliases,
+					&num_aliases, last_status, shell_name, &line2);
 		}
-
 		free(line);
 		close(file_descriptor);
 	}
 	else
 	{
-		last_status = handle_input(current_dir, envp, aliases, &num_aliases, last_status, shell_name);
+		last_status = handle_input(current_dir, envp, aliases,
+				&num_aliases, last_status, shell_name);
 		if (last_status)
-		{
 			exit(last_status);
-		}
 	}
-
 	/*free(current_dir);*/
 	return (0);
 }
@@ -171,7 +161,7 @@ void handle_input2(char *buffer, char *current_dir, char *envp[],
 {
 	handle_comment(buffer);
 	exit_func(buffer, shell_name, line2);
-	env_builtin(buffer, envp);
+	env_builtin(envp);
 	if (strncmp(buffer, "setenv", 6) == 0)
 		setenv_builtin(buffer, &envp);
 	else if (strncmp(buffer, "unsetenv", 8) == 0)
