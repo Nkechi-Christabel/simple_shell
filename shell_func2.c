@@ -66,7 +66,7 @@ void cd_builtin(char *buffer, char **current_dir)
 
 	token = _strtok(buffer, " ");
 	token = _strtok(NULL, " ");
-	
+
 	if (token == NULL || token[0] == '\0')
 		dir = _getenv("HOME");
 
@@ -90,7 +90,7 @@ void cd_builtin(char *buffer, char **current_dir)
 		free(new_dir);
 		return;
 	}
-	*current_dir = new_dir;
+	*current_dir = strdup(new_dir);
 }
 
 /**

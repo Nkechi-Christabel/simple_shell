@@ -34,7 +34,7 @@ int _setenv(const char *name, const char *value, int overwrite)
 
 	result = putenv(new_var);
 
-    return (result);
+	return (result);
 }
 
 /**
@@ -85,7 +85,7 @@ int _unsetenv(const char *name)
 	size_t count = 0;
 
 	if (name == NULL || name[0] == '\0' || strchr(name, '=') != NULL)
-		return -1;
+		return (-1);
 
 	for (env = environ; *env != NULL; ++env)
 		if (strncmp(*env, name, strlen(name)) != 0 || (*env)[strlen(name)] != '=')
@@ -93,7 +93,7 @@ int _unsetenv(const char *name)
 	new_env = (char **)malloc((count + 1) * sizeof(char *));
 
 	if (new_env == NULL)
-		return -1;
+		return (-1);
 
 	new_idx = 0;
 

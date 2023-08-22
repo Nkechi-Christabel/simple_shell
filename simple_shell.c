@@ -5,6 +5,8 @@
  *
  * @buffer: contains the command
  * @last_status: contains the last exit status
+ * @shell_name: points to the shell name
+ * @line: is the line count
  * Return: status
  */
 int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
@@ -47,6 +49,8 @@ int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
  * @aliases: An array of Alias structure
  * @num_aliases: The number of aliases
  * @last_status: contains the last exit status
+ * @shell_name: points to the shell name
+ *
  * Return: 0
  */
 int handle_input(char *current_dir, char *envp[], Alias *aliases,
@@ -90,12 +94,12 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
  */
 int main(int argc, char *argv[], char *envp[])
 {
-	char *current_dir = "/home/username", *line = NULL, *shell_name = argv[0];
+	char *current_dir = NULL, *line = NULL, *shell_name = argv[0];
 	int last_status = 0, num_aliases = 0, line2 = 1, file_descriptor;
 	size_t buffer_size = 0;
 	ssize_t read_result;
 	Alias aliases[MAX_ALIASES];
-	
+
 	if (argc > 1)
 	{
 		file_descriptor = open(argv[1], O_RDONLY);
@@ -125,7 +129,6 @@ int main(int argc, char *argv[], char *envp[])
 		if (last_status)
 			exit(last_status);
 	}
-	/*free(current_dir);*/
 	return (0);
 }
 /**
@@ -137,7 +140,10 @@ int main(int argc, char *argv[], char *envp[])
  * @aliases: An array of Alias structure
  * @num_aliases: The number of aliases
  * @last_status: contains the last exit status
+ * @shell_name: points to the shell name
+ * @line: is the line count
  *
+ * Return: last_status
  */
 int handle_input2(char *buffer, char *current_dir, char *envp[],
 		Alias *aliases, int *num_aliases, int last_status,
@@ -164,6 +170,6 @@ int handle_input2(char *buffer, char *current_dir, char *envp[],
 		last_status = handle_semicolon(buffer, last_status, shell_name, line);
 	else
 		last_status = handle_exec(buffer, last_status, shell_name, line);
-	
+
 	return (last_status);
 }

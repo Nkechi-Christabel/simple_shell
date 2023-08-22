@@ -5,8 +5,13 @@
  *
  * @last_status: contains the last exit status
  * @buffer: contains the command
+ * @shell_name: points to the shell name
+ * @line: is the line count
+ *
+ *  Return: status
  */
-int handle_semicolon(char *buffer, int last_status, char *shell_name, int *line)
+int handle_semicolon(char *buffer, int last_status, char *shell_name,
+		int *line)
 {
 	char *command, *trim_cmd;
 	size_t len;
@@ -43,6 +48,9 @@ int handle_semicolon(char *buffer, int last_status, char *shell_name, int *line)
  *
  * @last_status: contains the last exit status
  * @cmd: contains the command
+ * @shell_name: points to the shell name
+ * @line: is the line count
+ * Return: result
  */
 int handle_logical_or(char *cmd, int last_status, char *shell_name, int *line)
 {
@@ -57,7 +65,6 @@ int handle_logical_or(char *cmd, int last_status, char *shell_name, int *line)
 
 		while (*pos == ' ' || *pos == '\t' || *pos == '\n')
 			pos++;
-
 		len = strlen(pos);
 		while (len > 0 && (pos[len - 1] == ' ' || pos[len - 1] == '\t' ||
 				pos[len - 1] == '\n'))
@@ -94,6 +101,10 @@ int handle_logical_or(char *cmd, int last_status, char *shell_name, int *line)
  *
  * @last_status: contains the last exit status
  * @cmd: contains the command
+ * @shell_name: points to the shell name
+ * @line: is the line count
+ *
+ * Return: result
  */
 int handle_logical_and(char *cmd, int last_status, char *shell_name, int *line)
 {
@@ -124,7 +135,6 @@ int handle_logical_and(char *cmd, int last_status, char *shell_name, int *line)
 	}
 	while (*pos == ' ' || *pos == '\t' || *pos == '\n')
 		pos++;
-
 	len = strlen(pos);
 	while (len > 0 && (pos[len - 1] == ' ' || pos[len - 1] == '\t' ||
 			pos[len - 1] == '\n'))
