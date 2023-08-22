@@ -66,7 +66,7 @@ void setenv_builtin(char *buffer, char ***envp)
 
 	var_value = token;
 
-	if (setenv(var_name, var_value, 1) == -1)
+	if (_setenv(var_name, var_value, 1) == -1)
 		perror("setenv");
 	else
 		*envp = environ;
@@ -125,7 +125,7 @@ void unsetenv_builtin(char *buffer, char ***envp)
 		return;
 	}
 
-	if (unsetenv(token) == -1)
+	if (_unsetenv(token) == -1)
 		perror("unsetenv");
 	else
 		*envp = environ;

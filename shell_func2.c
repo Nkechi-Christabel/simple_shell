@@ -45,32 +45,6 @@ int call_fork(char *buffer, char **args, char *command_path)
 }
 
 /**
- * find_path_env - finds the PATH environment variable
- *
- * Return: path or NULL if not found
- */
-char *_getenv(void)
-{
-	char *path = NULL;
-	char **env = environ;
-
-	for (; *env != NULL; env++)
-	{
-		if (strncmp(*env, "HOME=", 5) == 0)
-		{
-			path = *env + 5;
-			break;
-		}
-	}
-	if (path == NULL)
-	{
-		perror("PATH environment variable not found");
-		return (NULL);
-	}
-	return (strdup(path));
-}
-
-/**
  * cd_builtin - Handles the "cd" command
  * @buffer: Input buffer to extract command and argument
  * @current_dir: The current directory
@@ -91,12 +65,12 @@ void cd_builtin(char *buffer, char **current_dir)
 	token = _strtok(NULL, " ");
 	
 	if (token == NULL || token[0] == '\0')
-		dir = getenv("HOME");
+		dir = _getenv("HOME");
 
 	else if (strcmp(token, "-") == 0)
 		dir = *current_dir;
 	else if (strcmp(token, "~") == 0)
-		dir = getenv("HOME");
+		dir = _getenv("HOME");
 	else
 		dir = token;
 

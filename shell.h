@@ -61,6 +61,5 @@ int _setenv(const char *name, const char *value, int overwrite);
 int _unsetenv(const char *name);
 int contains_only_spaces(const char *str);
 void trim_spaces(char *str);
-char *_getenv(void);
 
 #endif /* SHELL_H */
