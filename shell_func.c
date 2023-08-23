@@ -167,17 +167,13 @@ char *find_executable_path(const char *cmd)
 		if (abs_path == NULL)
 		{
 			perror("Memory allocation failed");
-			free(cmd);
 			exit(EXIT_FAILURE);
 		}
 		return (abs_path);
 	}
 	path = _getenv("PATH");
 	if (path == NULL)
-	{
-		free(cmd);
 		return (NULL);
-	}
 	path_copy = _strdup(path);
 	dir = _strtok(path_copy, ":");
 	while (dir != NULL)
@@ -196,11 +192,9 @@ char *find_executable_path(const char *cmd)
 			free(path_copy);
 			return (full_path);
 		}
-		free(cmd);
 		free(full_path);
 		dir = _strtok(NULL, ":");
 	}
-	free(cmd);
 	free(path_copy);
 	return (NULL);
 }
