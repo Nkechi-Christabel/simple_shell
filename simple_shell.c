@@ -22,14 +22,12 @@ int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 	if (command_path == NULL)
 	{
 		print_error(shell_name, line, args[0]);
-		free(buffer);
 		free(args);
 		free(replaced_command);
 		return (127);
 	}
 
 	status = call_fork(buffer, args, command_path);
-	free(command_path);
 
 
 	for (i = 0; args[i] != NULL; i++)
@@ -37,6 +35,7 @@ int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 
 	free(args);
 	free(replaced_command);
+	free(command_path);
 
 	return (status);
 }
@@ -80,7 +79,6 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 			free(buffer);
 			continue;
 		}
-
 		if (_strncmp(buffer, "setenv", 6) == 0)
 			setenv_builtin(buffer, &envp);
 		else
@@ -88,8 +86,10 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 			aliases, num_aliases, last_status, shell_name, &line);
 
 		if (last_status && is_interactive == 0)
+		{
+			free(buffer);
 			exit(last_status);
-
+		}
 		free(buffer);
 	}
 	free(buffer);
