@@ -21,11 +21,11 @@ char *echo_path(char *result, size_t *len, const char *var_name_start)
 		var_name_end++;
 
 	var_name_length = var_name_end - var_name_start;
-	var_name = strndup(var_name_start, var_name_length);
+	var_name = _strndup(var_name_start, var_name_length);
 
 	for (; *env != NULL; env++)
 	{
-		if (strncmp(*env, var_name, var_name_length) == 0 &&
+		if (_strncmp(*env, var_name, var_name_length) == 0 &&
 				(*env)[var_name_length] == '=')
 		{
 			var_value = *env + var_name_length + 1;
@@ -62,7 +62,7 @@ int is_valid_variable_character(char c)
  */
 char *append_string(char *result, const char *str, size_t *len)
 {
-	size_t str_len = strlen(str);
+	size_t str_len = _strlen(str);
 
 	result = realloc(result, *len + str_len + 1);
 	if (!result)
@@ -70,7 +70,7 @@ char *append_string(char *result, const char *str, size_t *len)
 		perror("Memory allocation failed");
 		exit(EXIT_FAILURE);
 	}
-	strcpy(result + *len, str);
+	_strcpy(result + *len, str);
 	*len += str_len;
 	return (result);
 }

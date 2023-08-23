@@ -19,7 +19,7 @@ int _putenv(const char *str)
 		return (-1);
 	}
 
-	equal_sign = strchr(env_str, '=');
+	equal_sign = _strchr(env_str, '=');
 
 	if (equal_sign == NULL)
 	{
@@ -29,7 +29,7 @@ int _putenv(const char *str)
 
 	*equal_sign = '\0';
 
-	result = setenv(env_str, equal_sign + 1, 1);
+	result = _setenv(env_str, equal_sign + 1, 1);
 
 	free(env_str);
 	return (result);
@@ -55,16 +55,16 @@ int _setenv(const char *name, const char *value, int overwrite)
 	if (!overwrite && _getenv(name) != NULL)
 		return (0);
 
-	len = strlen(name) + strlen(value) + 2;
+	len = _strlen(name) + _strlen(value) + 2;
 
 	new_var = (char *)malloc(len);
 
 	if (new_var == NULL)
 		return (-1);
 
-	strcpy(new_var, name);
-	strcat(new_var, "=");
-	strcat(new_var, value);
+	_strcpy(new_var, name);
+	_strcat(new_var, "=");
+	_strcat(new_var, value);
 
 	result = _putenv(new_var);
 
@@ -119,7 +119,7 @@ int _unsetenv(const char *name)
 
 	for (i = 0; environ[i] != NULL; i++)
 	{
-		if (strncmp(name, environ[i], strlen(name)) == 0 &&
+		if (_strncmp(name, environ[i], strlen(name)) == 0 &&
 				environ[i][strlen(name)] == '=')
 		{
 			index = i;

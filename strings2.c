@@ -7,7 +7,7 @@
  *
  * Return: pointer to destination
  */
-char *_strcpy(char *dest, char *src)
+char *_strcpy(char *dest, const char *src)
 {
 	int i = 0;
 
@@ -66,15 +66,17 @@ char *_strchr(const char *str, int ch)
 
 char *_strndup(const char *str, size_t n)
 {
-	size_t length = strlen(str);
+	size_t length = strlen(str), i;
+	char *new_str;
+
 	if (length > n)
 		length = n;
     
-	char *new_str = (char *)malloc(length + 1);
+	new_str = (char *)malloc(length + 1);
 	if (new_str == NULL)
 		return (NULL);
     
-	for (size_t i = 0; i < length; i++)
+	for (i = 0; i < length; i++)
 	{
 		new_str[i] = str[i];
 	}
