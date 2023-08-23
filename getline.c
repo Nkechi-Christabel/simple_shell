@@ -46,26 +46,37 @@ ssize_t getline_inp(char **buffer)
  */
 ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 {
-	static char buffer[BUFFER_SIZE];
+	char *buffer = (char *)malloc(BUFFER_SIZE);
 	static size_t buffer_pos, buffer_size;
 	size_t pos = 0;
 	char c, *new_ptr;
-
-	if (lineptr == NULL || n == NULL || stream == NULL)
+	
+	if (buffer == NULL)
 		return (-1);
+	if (lineptr == NULL || n == NULL || stream == NULL)
+	{
+		free(buffer);
+		return (-1);
+	}
 	if (*lineptr == NULL || *n == 0)
 	{
 		*n = BUFFER_SIZE;
 		*lineptr = (char *)malloc(*n);
 		if (*lineptr == NULL)
+		{
+			free(buffer);
 			return (-1);
+		}
 	}
 	while (1)
 	{
 		if (read_buffer(buffer, &buffer_pos, &buffer_size, stream) == 0)
 		{
 			if (pos == 0)
+			{
+				free(buffer);
 				return (-1);
+			}
 			break;
 		}
 		c = buffer[buffer_pos++];
@@ -78,6 +89,7 @@ ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 			new_ptr = (char *)realloc(*lineptr, *n);
 			if (new_ptr == NULL)
 			{
+				free(buffer);
 				free(*lineptr);
 				return (-1);
 			}
@@ -85,6 +97,8 @@ ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 		}
 	}
 	(*lineptr)[pos] = '\0';
+
+	free(buffer);
 	return (pos);
 }
 
