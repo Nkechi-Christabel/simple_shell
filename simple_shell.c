@@ -76,7 +76,10 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 		line++;
 		if (buffer == NULL || _strcmp(buffer, "") == 0 || buffer[0] == '#'
 				|| contains_only_spaces(buffer))
+		{
+			free(buffer);
 			continue;
+		}
 
 		if (_strncmp(buffer, "setenv", 6) == 0)
 			setenv_builtin(buffer, &envp);
