@@ -20,7 +20,7 @@ int handle_semicolon(char *buffer, int last_status, char *shell_name,
 	command = buffer;
 	while (*command != '\0')
 	{
-		char *semicolon = strstr(command, ";");
+		char *semicolon = _strstr(command, ";");
 
 		if (semicolon != NULL)
 		{
@@ -33,7 +33,7 @@ int handle_semicolon(char *buffer, int last_status, char *shell_name,
 		while (*trim_cmd == ' ' || *trim_cmd == '\t' || *trim_cmd == '\n')
 			trim_cmd++;
 
-		len = strlen(trim_cmd);
+		len = _strlen(trim_cmd);
 
 		while (len > 0 && (trim_cmd[len - 1] == ' ' ||
 			trim_cmd[len - 1] == '\t' || trim_cmd[len - 1] == '\n'))
@@ -71,13 +71,13 @@ int handle_logical_or(char *cmd, int last_status, char *shell_name, int *line)
 	size_t len;
 	int result;
 
-	while ((next_cmd = strstr(pos, or_token)) != NULL)
+	while ((next_cmd = _strstr(pos, or_token)) != NULL)
 	{
 		*next_cmd = '\0';
 
 		while (*pos == ' ' || *pos == '\t' || *pos == '\n')
 			pos++;
-		len = strlen(pos);
+		len = _strlen(pos);
 		while (len > 0 && (pos[len - 1] == ' ' || pos[len - 1] == '\t' ||
 				pos[len - 1] == '\n'))
 		{
@@ -91,11 +91,11 @@ int handle_logical_or(char *cmd, int last_status, char *shell_name, int *line)
 			if (result == 0)
 				return (result);
 		}
-		pos = next_cmd + strlen(or_token);
+		pos = next_cmd + _strlen(or_token);
 	}
 	while (*pos == ' ' || *pos == '\t' || *pos == '\n')
 		pos++;
-	len = strlen(pos);
+	len = _strlen(pos);
 	while (len > 0 && (pos[len - 1] == ' ' || pos[len - 1] == '\t' ||
 			pos[len - 1] == '\n'))
 	{
@@ -125,12 +125,12 @@ int handle_logical_and(char *cmd, int last_status, char *shell_name, int *line)
 	size_t len;
 	int result;
 
-	while ((next_cmd = strstr(pos, and_token)) != NULL)
+	while ((next_cmd = _strstr(pos, and_token)) != NULL)
 	{
 		*next_cmd = '\0';
 		while (*pos == ' ' || *pos == '\t' || *pos == '\n')
 			pos++;
-		len = strlen(pos);
+		len = _strlen(pos);
 		while (len > 0 && (pos[len - 1] == ' ' || pos[len - 1] == '\t' ||
 				pos[len - 1] == '\n'))
 		{
@@ -143,11 +143,11 @@ int handle_logical_and(char *cmd, int last_status, char *shell_name, int *line)
 			if (result != 0)
 				return (result);
 		}
-		pos = next_cmd + strlen(and_token);
+		pos = next_cmd + _strlen(and_token);
 	}
 	while (*pos == ' ' || *pos == '\t' || *pos == '\n')
 		pos++;
-	len = strlen(pos);
+	len = _strlen(pos);
 	while (len > 0 && (pos[len - 1] == ' ' || pos[len - 1] == '\t' ||
 			pos[len - 1] == '\n'))
 	{

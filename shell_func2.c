@@ -70,9 +70,9 @@ void cd_builtin(char *buffer, char **current_dir)
 	if (token == NULL || token[0] == '\0')
 		dir = _getenv("HOME");
 
-	else if (strcmp(token, "-") == 0)
+	else if (_strcmp(token, "-") == 0)
 		dir = *current_dir;
-	else if (strcmp(token, "~") == 0)
+	else if (_strcmp(token, "~") == 0)
 		dir = _getenv("HOME");
 	else
 		dir = token;
@@ -90,7 +90,7 @@ void cd_builtin(char *buffer, char **current_dir)
 		free(new_dir);
 		return;
 	}
-	*current_dir = strdup(new_dir);
+	*current_dir = _strdup(new_dir);
 }
 
 /**
@@ -100,7 +100,7 @@ void cd_builtin(char *buffer, char **current_dir)
  */
 void handle_comment(char *buffer)
 {
-	char *comment_start = strchr(buffer, '#');
+	char *comment_start = _strchr(buffer, '#');
 
 	if (comment_start != NULL)
 		*comment_start = '\0';
@@ -119,7 +119,7 @@ int contains_only_spaces(const char *str)
 
 	for (i = 0; str[i]; i++)
 	{
-		if (!isspace((unsigned char)str[i]))
+		if (!_isspace((unsigned char)str[i]))
 		{
 			found_non_space = 1;
 			break;

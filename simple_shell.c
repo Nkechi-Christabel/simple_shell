@@ -74,11 +74,11 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 			break;
 		}
 		line++;
-		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#'
+		if (buffer == NULL || _strcmp(buffer, "") == 0 || buffer[0] == '#'
 				|| contains_only_spaces(buffer))
 			continue;
 
-		if (strncmp(buffer, "setenv", 6) == 0)
+		if (_strncmp(buffer, "setenv", 6) == 0)
 			setenv_builtin(buffer, &envp);
 		else
 			last_status = handle_input2(buffer, current_dir, envp,
@@ -117,9 +117,9 @@ int main(int argc, char *argv[], char *envp[])
 		}
 		while ((read_result = read_line(file_descriptor, &line, &buffer_size)) != -1)
 		{
-			if (strlen(line) == 0)
+			if (_strlen(line) == 0)
 				break;
-			line[strcspn(line, "\n")] = '\0';
+			line[_strcspn(line, "\n")] = '\0';
 			if (read_result == 0 || isspace((unsigned char)line[0]) || line[0] == '#')
 				continue;
 			line2++;
@@ -159,21 +159,21 @@ int handle_input2(char *buffer, char *current_dir, char *envp[],
 	trim_spaces(buffer);
 	handle_comment(buffer);
 	exit_func(buffer, shell_name, line);
-	if (strncmp(buffer, "setenv", 6) == 0)
+	if (_strncmp(buffer, "setenv", 6) == 0)
 		setenv_builtin(buffer, &envp);
-	else if (strncmp(buffer, "env", 3) == 0)
+	else if (_strncmp(buffer, "env", 3) == 0)
 		env_builtin(envp);
-	else if (strncmp(buffer, "unsetenv", 8) == 0)
+	else if (_strncmp(buffer, "unsetenv", 8) == 0)
 		unsetenv_builtin(buffer, &envp);
-	else if (strncmp(buffer, "alias", 5) == 0)
+	else if (_strncmp(buffer, "alias", 5) == 0)
 		alias_builtin(buffer, aliases, num_aliases);
-	else if (strncmp(buffer, "cd", 2) == 0)
+	else if (_strncmp(buffer, "cd", 2) == 0)
 		cd_builtin(buffer, &current_dir);
-	else if  (strstr(buffer, "&&") != NULL)
+	else if  (_strstr(buffer, "&&") != NULL)
 		last_status = handle_logical_and(buffer, last_status, shell_name, line);
-	else if (strstr(buffer, "||") != NULL)
+	else if (_strstr(buffer, "||") != NULL)
 		last_status = handle_logical_or(buffer, last_status, shell_name, line);
-	else if (strstr(buffer, ";") != NULL)
+	else if (_strstr(buffer, ";") != NULL)
 		last_status = handle_semicolon(buffer, last_status, shell_name, line);
 	else
 		last_status = handle_exec(buffer, last_status, shell_name, line);

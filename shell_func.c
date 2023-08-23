@@ -10,7 +10,7 @@
  */
 void exit_func(char *buffer, char *shell_name, int *line)
 {
-	if (strncmp(buffer, "exit", 4) == 0)
+	if (_strncmp(buffer, "exit", 4) == 0)
 	{
 		int status, i = 0, isNum;
 		char *arg = buffer + 4;
@@ -39,7 +39,7 @@ void exit_func(char *buffer, char *shell_name, int *line)
 			free(buffer);
 			exit(2);
 		}
-		status = atoi(arg);
+		status = _atoi(arg);
 		if (status < 0)
 		{
 			print_error3(shell_name, line, arg);
@@ -64,13 +64,13 @@ void print_error3(char *shell_name, int *line, char *command)
 
 	intToString((*line), number_str);
 
-	write(STDERR_FILENO, shell_name, strlen(shell_name));
+	write(STDERR_FILENO, shell_name, _strlen(shell_name));
 	write(STDERR_FILENO, ": ", 2);
-	write(STDERR_FILENO,  number_str, strlen(number_str));
+	write(STDERR_FILENO,  number_str, _strlen(number_str));
 	write(STDERR_FILENO, ": ", 2);
 	write(STDERR_FILENO, "exit: ", 6);
 	write(STDERR_FILENO, "Illegal number: ", 16);
-	write(STDERR_FILENO, command, strlen(command));
+	write(STDERR_FILENO, command, _strlen(command));
 	write(STDERR_FILENO, "\n", 1);
 }
 
@@ -95,9 +95,9 @@ void env_builtin(char **envp)
 	{
 		for (env_var = envp; *env_var != NULL; env_var++)
 		{
-			if (strncmp(*env_var, desired_order[i], strlen(desired_order[i])) == 0)
+			if (_strncmp(*env_var, desired_order[i], _strlen(desired_order[i])) == 0)
 			{
-				write(STDOUT_FILENO, *env_var, strlen(*env_var));
+				write(STDOUT_FILENO, *env_var, _strlen(*env_var));
 				write(STDOUT_FILENO, "\n", 1);
 				break;
 			}
@@ -108,7 +108,7 @@ void env_builtin(char **envp)
 		found = 0;
 		for (j = 0; desired_order[j] != NULL; j++)
 		{
-			if (strncmp(*rem, desired_order[j], strlen(desired_order[j])) == 0)
+			if (_strncmp(*rem, desired_order[j], _strlen(desired_order[j])) == 0)
 			{
 				found = 1;
 				break;
@@ -116,7 +116,7 @@ void env_builtin(char **envp)
 		}
 		if (!found)
 		{
-			write(STDOUT_FILENO, *rem, strlen(*rem));
+			write(STDOUT_FILENO, *rem, _strlen(*rem));
 			write(STDOUT_FILENO, "\n", 1);
 		}
 	}
@@ -135,14 +135,12 @@ char *_getenv(const char *name)
 	size_t name_len;
 
 	if (name == NULL || env == NULL)
-	{
 		return (NULL);
-	}
 
-	name_len = strlen(name);
+	name_len = _strlen(name);
 	for (; *env != NULL; env++)
 	{
-		if (strncmp(name, *env, name_len) == 0 && (*env)[name_len] == '=')
+		if (_strncmp(name, *env, name_len) == 0 && (*env)[name_len] == '=')
 		{
 			return (*env + name_len + 1);
 		}
@@ -165,7 +163,7 @@ char *find_executable_path(const char *cmd)
 
 	if (access(cmd, X_OK) == 0)
 	{
-		abs_path = strdup(cmd);
+		abs_path = _strdup(cmd);
 		if (abs_path == NULL)
 		{
 			perror("Memory allocation failed");
@@ -176,19 +174,19 @@ char *find_executable_path(const char *cmd)
 	path = _getenv("PATH");
 	if (path == NULL)
 		return (NULL);
-	path_copy = strdup(path);
+	path_copy = _strdup(path);
 	dir = _strtok(path_copy, ":");
 	while (dir != NULL)
 	{
-		full_path = (char *)malloc(strlen(dir) + strlen(cmd) + 2);
+		full_path = (char *)malloc(_strlen(dir) + _strlen(cmd) + 2);
 		if (full_path == NULL)
 		{
 			perror("Memory allocation failed");
 			exit(EXIT_FAILURE);
 		}
-		strcpy(full_path, dir);
-		strcat(full_path, "/");
-		strcat(full_path, cmd);
+		_strcpy(full_path, dir);
+		_strcat(full_path, "/");
+		_strcat(full_path, cmd);
 		if (access(full_path, X_OK) == 0)
 		{
 			free(path_copy);

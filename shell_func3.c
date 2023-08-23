@@ -8,12 +8,12 @@
  */
 void trim_spaces(char *str)
 {
-	int start = 0, end = strlen(str) - 1, i;
+	int start = 0, end = _strlen(str) - 1, i;
 
-	while (isspace(str[start]))
+	while (_isspace(str[start]))
 		start++;
 
-	while (end > start && isspace(str[end]))
+	while (end > start && _isspace(str[end]))
 		end--;
 
 	for (i = start; i <= end; i++)
@@ -35,11 +35,11 @@ void print_error(char *shell_name, int *line, char *command)
 
 	intToString((*line), number_str);
 
-	write(STDERR_FILENO, shell_name, strlen(shell_name));
+	write(STDERR_FILENO, shell_name, _strlen(shell_name));
 	write(STDERR_FILENO, ": ", 2);
-	write(STDERR_FILENO,  number_str, strlen(number_str));
+	write(STDERR_FILENO,  number_str, _strlen(number_str));
 	write(STDERR_FILENO, ": ", 2);
-	write(STDERR_FILENO, command, strlen(command));
+	write(STDERR_FILENO, command, _strlen(command));
 	write(STDERR_FILENO, ": not found\n", 12);
 }
 
@@ -109,10 +109,10 @@ char *intToString(int num, char *str)
  */
 void print_error2(char *shell_name, char *command)
 {
-	write(STDERR_FILENO, shell_name, strlen(shell_name));
+	write(STDERR_FILENO, shell_name, _strlen(shell_name));
 	write(STDERR_FILENO, ": ", 2);
 	write(STDERR_FILENO, "0: ", 3);
 	write(STDERR_FILENO, "cannot open ", 12);
-	write(STDERR_FILENO, command, strlen(command));
+	write(STDERR_FILENO, command, _strlen(command));
 	write(STDERR_FILENO, ": No such file\n", 15);
 }

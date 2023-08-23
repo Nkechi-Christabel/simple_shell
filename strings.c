@@ -58,3 +58,27 @@ char *_strcat(char *dest, char *src)
 	*dest = *src;
 	return (ret);
 }
+
+/**
+ * _strncmp - compare two strings up to a specified number of characters
+ * @str1: the first string
+ * @str2: the second string
+ * @n: the maximum number of characters to compare
+ *
+ * Return: an integer less than, equal to, or greater than zero if str1 is found,
+ * respectively, to be less than, to match, or be greater than str2.
+ */
+
+int _strncmp(const char *str1, const char *str2, size_t n)
+{
+	for (size_t i = 0; i < n; i++)
+	{
+		if (str1[i] != str2[i])
+			return ((int)(str1[i] - str2[i]));
+	}
+
+        if (str1[i] == '\0')
+		return 0;
+
+	return 0;
+}
