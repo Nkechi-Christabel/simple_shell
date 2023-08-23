@@ -44,7 +44,9 @@ int call_fork(char *buffer, char **args, char *command_path)
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
 	else
+	{
 		return (-1);
+	}
 }
 
 /**
