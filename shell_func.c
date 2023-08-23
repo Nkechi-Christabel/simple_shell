@@ -16,7 +16,10 @@ void exit_func(char *buffer, char *shell_name, int *line)
 		char *arg = buffer + 4;
 
 		if (*arg == '\0')
+		{
+			free(buffer);
 			exit(0);
+		}
 		while (*arg == ' ')
 			arg++;
 
