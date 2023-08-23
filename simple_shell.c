@@ -19,12 +19,12 @@ int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 	args = tokens(replaced_command);
 
 	command_path = find_executable_path(args[0]);
-	if (!command_path || access(command_path, X_OK) == -1)
+	if (!command_path)
 	{
 		print_error(shell_name, line, args[0]);
 		free(args);
 		free(replaced_command);
-		exit(127);
+		return (127);
 	}
 
 	status = call_fork(buffer, args, command_path);
