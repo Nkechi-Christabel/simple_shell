@@ -125,7 +125,7 @@ int main(int argc, char *argv[], char *envp[])
 			if (_strlen(line) == 0)
 				break;
 			line[_strcspn(line, "\n")] = '\0';
-			if (read_result == 0 || isspace((unsigned char)line[0]) || line[0] == '#')
+			if (read_result == 0 || _isspace((unsigned char)line[0]) || line[0] == '#')
 				continue;
 			line2++;
 			last_status = handle_input2(line, current_dir, envp,
