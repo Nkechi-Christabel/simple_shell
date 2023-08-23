@@ -65,8 +65,7 @@ char *_strcat(char *dest, const char *src)
  * @str2: the second string
  * @n: the maximum number of characters to compare
  *
- * Return: an integer less than, equal to, or greater than zero if str1 is found,
- * respectively, to be less than, to match, or be greater than str2.
+ * Return: (int)(str1[i] - str2[i])
  */
 
 int _strncmp(const char *str1, const char *str2, size_t n)
@@ -79,30 +78,37 @@ int _strncmp(const char *str1, const char *str2, size_t n)
 			return ((int)(str1[i] - str2[i]));
 	}
 
-        if (str1[i] == '\0')
-		return 0;
+	if (str1[i] == '\0')
+		return (0);
 
-	return 0;
+	return (0);
 }
 
+/**
+ * _strstr - search for a string
+ * @haystack: contains the string
+ * @needle: contains string to be searched for
+ *
+ * Return: (char *)haystack
+ */
 char *_strstr(const char *haystack, const char *needle)
 {
 	size_t needle_length = strlen(needle);
-    
+
 	if (needle_length == 0)
 	{
-	return ((char *)haystack);
+		return ((char *)haystack);
 	}
-    
+
 	while (*haystack)
 	{
-        	if (*haystack == *needle)
+		if (*haystack == *needle)
 		{
 			if (strncmp(haystack, needle, needle_length) == 0)
-				return (char *)haystack;
+				return ((char *)haystack);
 		}
 		haystack++;
 	}
-    
-	return NULL;
+
+	return (NULL);
 }
