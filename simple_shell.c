@@ -19,7 +19,7 @@ int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 	args = tokens(replaced_command);
 
 	command_path = find_executable_path(args[0]);
-	if (!command_path)
+	if (command_path == NULL)
 	{
 		print_error(shell_name, line, args[0]);
 		free(args);
