@@ -18,7 +18,7 @@ char *_strtok(char *str, const char *delim)
 		return (NULL);
 
 	start = token;
-	end = strpbrk(start, delim);
+	end = _strpbrk(start, delim);
 
 	if (end != NULL)
 	{
@@ -42,7 +42,7 @@ char **tokens(char *buffer)
 	int argc = 0, i = 0;
 	char *copy, *token, **argv = NULL, *delim = " ";
 
-	copy = strdup(buffer);
+	copy = _strdup(buffer);
 	if (!copy)
 	{
 		perror("Memory allocation failed");
@@ -65,7 +65,7 @@ char **tokens(char *buffer)
 	token = _strtok(copy, delim);
 	while (token)
 	{
-		argv[i] = strdup(token);
+		argv[i] = _strdup(token);
 		if (!argv[i])
 		{
 			perror("Memory allocation failed");

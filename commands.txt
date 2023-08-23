@@ -1,4 +1,0 @@
-echo "First command"
-exit
-echo "This should not be executed"
-

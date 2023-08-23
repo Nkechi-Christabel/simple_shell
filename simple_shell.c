@@ -5,9 +5,11 @@
  *
  * @buffer: contains the command
  * @last_status: contains the last exit status
+ * @shell_name: points to the shell name
+ * @line: is the line count
  * Return: status
  */
-int handle_exec(char *buffer, int last_status)
+int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 {
 	char **args, *command_path, *replaced_command;
 	int i;
@@ -19,21 +21,21 @@ int handle_exec(char *buffer, int last_status)
 	command_path = find_executable_path(args[0]);
 	if (command_path == NULL)
 	{
-		perror("Command not found");
-		free(buffer);
+		print_error(shell_name, line, args[0]);
 		free(args);
 		free(replaced_command);
-		return (-1);
+		return (127);
 	}
 
 	status = call_fork(buffer, args, command_path);
-	free(command_path);
+
 
 	for (i = 0; args[i] != NULL; i++)
 		free(args[i]);
 
 	free(args);
 	free(replaced_command);
+	free(command_path);
 
 	return (status);
 }
@@ -46,49 +48,52 @@ int handle_exec(char *buffer, int last_status)
  * @aliases: An array of Alias structure
  * @num_aliases: The number of aliases
  * @last_status: contains the last exit status
+ * @shell_name: points to the shell name
+ *
  * Return: 0
  */
 int handle_input(char *current_dir, char *envp[], Alias *aliases,
-		int *num_aliases, int last_status)
+		int *num_aliases, int last_status, char *shell_name)
 {
 	char *buffer = NULL;
-	int pipe = 1;
+	int is_interactive = isatty(STDIN_FILENO), line = 0;
 
-	while (1 && pipe)
+	signal(SIGINT, sigint_handler);
+	while (1)
 	{
-		if (isatty(STDIN_FILENO) == 0)
-			pipe = 0;
-		write(STDOUT_FILENO, ":)$ ", 4);
-		fflush(stdout);
+		if (is_interactive)
+		{
+			write(STDOUT_FILENO, ":)$ ", 4);
+			fflush(stdout);
+		}
 		if (getline_inp(&buffer) == -1)
 		{
-			write(STDOUT_FILENO, "\n", 2);
+			if (is_interactive)
+				write(STDIN_FILENO, "\n", 1);
 			break;
 		}
-		if (buffer == NULL || strcmp(buffer, "") == 0 || buffer[0] == '#')
+		line++;
+		if (buffer == NULL || _strcmp(buffer, "") == 0 || buffer[0] == '#'
+				|| contains_only_spaces(buffer))
+		{
+			free(buffer);
 			continue;
-		handle_comment(buffer);
-		exit_func(buffer);
-		env_builtin(buffer, envp);
-		if (strncmp(buffer, "setenv", 6) == 0)
+		}
+		if (_strncmp(buffer, "setenv", 6) == 0)
 			setenv_builtin(buffer, &envp);
-		else if (strncmp(buffer, "unsetenv", 8) == 0)
-			unsetenv_builtin(buffer, &envp);
-		else if (strncmp(buffer, "alias", 5) == 0)
-			alias_builtin(buffer, aliases, num_aliases);
-		else if (strncmp(buffer, "cd", 2) == 0)
-			cd_builtin(buffer, &current_dir);
-		else if  (strstr(buffer, "&&") != NULL)
-			handle_logical_and(buffer, last_status);
-		else if (strstr(buffer, "||") != NULL)
-			handle_logical_or(buffer, last_status);
-		else if (strstr(buffer, ";") != NULL)
-			handle_semicolon(buffer, last_status);
 		else
-			last_status = handle_exec(buffer, last_status);
+			last_status = handle_input2(buffer, current_dir, envp,
+			aliases, num_aliases, last_status, shell_name, &line);
+
+		if (last_status && is_interactive == 0)
+		{
+			free(buffer);
+			exit(last_status);
+		}
+		free(buffer);
 	}
 	free(buffer);
-	return (0);
+	return (last_status);
 }
 
 /**
@@ -101,41 +106,41 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
  */
 int main(int argc, char *argv[], char *envp[])
 {
-	char *home_dir = "/home/username", *current_dir = NULL, *line = NULL;
-	int last_status = 0, num_aliases = 0;
-	size_t len = 0;
-	ssize_t read;
+	char *current_dir = NULL, *line = NULL, *shell_name = argv[0];
+	int last_status = 0, num_aliases = 0, line2 = 1, file_descriptor;
+	size_t buffer_size = 0;
+	ssize_t read_result;
 	Alias aliases[MAX_ALIASES];
 
-	current_dir = strdup(home_dir);
-	if (current_dir == NULL)
-	{
-		perror("strdup");
-		exit(EXIT_FAILURE);
-	}
 	if (argc > 1)
 	{
-		FILE *file = fopen(argv[1], "r");
-
-		if (file == NULL)
+		file_descriptor = open(argv[1], O_RDONLY);
+		if (file_descriptor == -1)
 		{
-			perror("Error opening file");
-			return (1);
+			print_error2(shell_name, argv[1]);
+			return (2);
 		}
-		while ((read = getline(&line, &len, file)) != -1)
+		while ((read_result = read_line(file_descriptor, &line, &buffer_size)) != -1)
 		{
-			line[strcspn(line, "\n")] = '\0';
-			if (strlen(line) == 0 || isspace((unsigned char)line[0]) || line[0] == '#')
+			if (_strlen(line) == 0)
+				break;
+			line[_strcspn(line, "\n")] = '\0';
+			if (read_result == 0 || _isspace((unsigned char)line[0]) || line[0] == '#')
 				continue;
-			handle_input2(line, current_dir, envp, aliases,
-					&num_aliases, last_status);
+			line2++;
+			last_status = handle_input2(line, current_dir, envp,
+					aliases, &num_aliases, last_status, shell_name, &line2);
 		}
 		free(line);
-		fclose(file);
+		close(file_descriptor);
 	}
 	else
-		handle_input(current_dir, envp, aliases, &num_aliases, last_status);
-	free(current_dir);
+	{
+		last_status = handle_input(current_dir, envp, aliases,
+				&num_aliases, last_status, shell_name);
+		if (last_status)
+			exit(last_status);
+	}
 	return (0);
 }
 /**
@@ -147,28 +152,36 @@ int main(int argc, char *argv[], char *envp[])
  * @aliases: An array of Alias structure
  * @num_aliases: The number of aliases
  * @last_status: contains the last exit status
+ * @shell_name: points to the shell name
+ * @line: is the line count
  *
+ * Return: last_status
  */
-void handle_input2(char *buffer, char *current_dir, char *envp[],
-		Alias *aliases, int *num_aliases, int last_status)
+int handle_input2(char *buffer, char *current_dir, char *envp[],
+		Alias *aliases, int *num_aliases, int last_status,
+		char *shell_name, int *line)
 {
+	trim_spaces(buffer);
 	handle_comment(buffer);
-	exit_func(buffer);
-	env_builtin(buffer, envp);
-	if (strncmp(buffer, "setenv", 6) == 0)
+	exit_func(buffer, shell_name, line);
+	if (_strncmp(buffer, "setenv", 6) == 0)
 		setenv_builtin(buffer, &envp);
-	else if (strncmp(buffer, "unsetenv", 8) == 0)
+	else if (_strncmp(buffer, "env", 3) == 0)
+		env_builtin(envp);
+	else if (_strncmp(buffer, "unsetenv", 8) == 0)
 		unsetenv_builtin(buffer, &envp);
-	else if (strncmp(buffer, "alias", 5) == 0)
+	else if (_strncmp(buffer, "alias", 5) == 0)
 		alias_builtin(buffer, aliases, num_aliases);
-	else if (strncmp(buffer, "cd", 2) == 0)
+	else if (_strncmp(buffer, "cd", 2) == 0)
 		cd_builtin(buffer, &current_dir);
-	else if  (strstr(buffer, "&&") != NULL)
-		handle_logical_and(buffer, last_status);
-	else if (strstr(buffer, "||") != NULL)
-		handle_logical_or(buffer, last_status);
-	else if (strstr(buffer, ";") != NULL)
-		handle_semicolon(buffer, last_status);
+	else if  (_strstr(buffer, "&&") != NULL)
+		last_status = handle_logical_and(buffer, last_status, shell_name, line);
+	else if (_strstr(buffer, "||") != NULL)
+		last_status = handle_logical_or(buffer, last_status, shell_name, line);
+	else if (_strstr(buffer, ";") != NULL)
+		last_status = handle_semicolon(buffer, last_status, shell_name, line);
 	else
-		last_status = handle_exec(buffer, last_status);
+		last_status = handle_exec(buffer, last_status, shell_name, line);
+
+	return (last_status);
 }

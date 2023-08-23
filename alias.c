@@ -7,7 +7,7 @@
 
 void print_string(const char *str)
 {
-	size_t len = strlen(str);
+	size_t len = _strlen(str);
 
 	write(STDOUT_FILENO, str, len);
 }
@@ -24,9 +24,9 @@ void list_aliases(Alias *aliases, int num_aliases)
 	for (i = 0; i < num_aliases; i++)
 	{
 		print_string(aliases[i].name);
-		print_string("=");
+		print_string("='");
 		print_string(aliases[i].value);
-		print_string("\n");
+		print_string("'\n");
 	}
 }
 
@@ -40,7 +40,7 @@ void list_aliases(Alias *aliases, int num_aliases)
 void create_or_modify_alias(const char *token, Alias *aliases,
 		int *num_aliases)
 {
-	char *equal_sign = strchr(token, '=');
+	char *equal_sign = _strchr(token, '=');
 	const char *max_reached;
 	int i, alias_index;
 
@@ -57,7 +57,7 @@ void create_or_modify_alias(const char *token, Alias *aliases,
 
 		for (i = 0; i < *num_aliases; i++)
 		{
-			if (strncmp(aliases[i].name, token, equal_sign - token) == 0)
+			if (_strncmp(aliases[i].name, token, equal_sign - token) == 0)
 			{
 				alias_index = i;
 				break;
@@ -66,14 +66,14 @@ void create_or_modify_alias(const char *token, Alias *aliases,
 
 		if (alias_index == -1)
 		{
-			aliases[*num_aliases].name = strndup(token, equal_sign - token);
-			aliases[*num_aliases].value = strdup(equal_sign + 1);
+			aliases[*num_aliases].name = _strndup(token, equal_sign - token);
+			aliases[*num_aliases].value = _strdup(equal_sign + 1);
 			(*num_aliases)++;
 		}
 		else
 		{
 			free(aliases[alias_index].value);
-			aliases[alias_index].value = strdup(equal_sign + 1);
+			aliases[alias_index].value = _strdup(equal_sign + 1);
 		}
 	}
 }
@@ -90,16 +90,16 @@ void alias_builtin(char *buffer, Alias *aliases, int *num_aliases)
 	char *command;
 	int i, alias_index = -1;
 
-	token = strchr(buffer, ' ');
+	token = _strchr(buffer, ' ');
 
 	if (token == NULL)
 		list_aliases(aliases, *num_aliases);
 	else
 	{
-		command = strdup(token + 1);
+		command = _strdup(token + 1);
 		for (i = 0; i < *num_aliases; i++)
 		{
-			if (strcmp(aliases[i].name, command) == 0)
+			if (_strcmp(aliases[i].name, command) == 0)
 			{
 				alias_index = i;
 				break;
@@ -111,9 +111,9 @@ void alias_builtin(char *buffer, Alias *aliases, int *num_aliases)
 		else
 		{
 			print_string(aliases[alias_index].name);
-			print_string("=");
+			print_string("='");
 			print_string(aliases[alias_index].value);
-			print_string("\n");
+			print_string("'\n");
 		}
 
 		free(command);
