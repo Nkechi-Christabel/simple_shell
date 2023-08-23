@@ -24,7 +24,10 @@ int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 		print_error(shell_name, line, args[0]);
 		free(args);
 		free(replaced_command);
-		exit(127);
+		if (errno == EACCES)
+			exit(126);
+		else
+			exit(127);
 	}
 
 	status = call_fork(buffer, args, command_path);
