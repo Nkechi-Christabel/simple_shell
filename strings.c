@@ -58,3 +58,27 @@ char *_strcat(char *dest, char *src)
 	*dest = *src;
 	return (ret);
 }
+
+char *_strstr(const char *haystack, const char *needle)
+{
+	size_t needle_length = strlen(needle);
+    
+	if (needle_length == 0)
+	{
+	return ((char *)haystack);
+	}
+    
+	while (*haystack)
+	{
+        	if (*haystack == *needle)
+		{
+			if (strncmp(haystack, needle, needle_length) == 0)
+				return (char *)haystack;
+		}
+		haystack++;
+	}
+    
+	return NULL;
+}
+
+

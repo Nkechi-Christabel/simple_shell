@@ -87,4 +87,17 @@ void print_error3(char *shell_name, int *line, char *command);
 ssize_t read_line(int fd, char **line, size_t *buffer_size);
 char *_getenv(const char *name);
 
+int _strlen(char *s);
+int _strcmp(char *s1, char *s2);
+char *_strcat(char *dest, char *src);
+char *_strstr(const char *haystack, const char *needle);
+char *_strcpy(char *dest, char *src);
+char *_strdup(const char *str);
+char *_strchr(const char *str, int ch);
+char *_strndup(const char *str, size_t n);
+size_t _strcspn(const char *str, const char *reject);
+char *_strpbrk(const char *str, const char *accept);
+int _isspace(char c);
+int _atoi(char *s);
+
 #endif /* SHELL_H */

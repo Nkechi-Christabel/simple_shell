@@ -44,3 +44,54 @@ char *_strdup(const char *str)
 		ret[length] = *--str;
 	return (ret);
 }
+
+char *_strchr(const char *str, int ch)
+{
+	while (*str != '\0')
+	{
+		if (*str == ch)
+		{
+			return ((char *)str);
+		}
+		str++;
+	}
+
+	if (ch == '\0')
+	{
+		return ((char *)str);
+	}
+    
+	return (NULL);
+}
+
+char *_strndup(const char *str, size_t n)
+{
+	size_t length = strlen(str);
+	if (length > n)
+		length = n;
+    
+	char *new_str = (char *)malloc(length + 1);
+	if (new_str == NULL)
+		return (NULL);
+    
+	for (size_t i = 0; i < length; i++)
+	{
+		new_str[i] = str[i];
+	}
+	new_str[length] = '\0';
+
+	return (new_str);
+}
+
+size_t _strcspn(const char *str, const char *reject)
+{
+	size_t count = 0;
+
+	while (str[count] != '\0')
+	{
+		if (strchr(reject, str[count]) != NULL)
+			break;
+		count++;
+	}
+	return (count);
+}
