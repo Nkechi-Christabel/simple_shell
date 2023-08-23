@@ -49,7 +49,7 @@ int _setenv(const char *name, const char *value, int overwrite)
 	char *new_var;
 	int result;
 
-	if (name == NULL || name[0] == '\0' || strchr(name, '=') != NULL)
+	if (name == NULL || name[0] == '\0' || _strchr(name, '=') != NULL)
 		return (-1);
 
 	if (!overwrite && _getenv(name) != NULL)
@@ -119,8 +119,8 @@ int _unsetenv(const char *name)
 
 	for (i = 0; environ[i] != NULL; i++)
 	{
-		if (_strncmp(name, environ[i], strlen(name)) == 0 &&
-				environ[i][strlen(name)] == '=')
+		if (_strncmp(name, environ[i], _strlen(name)) == 0 &&
+				environ[i][_strlen(name)] == '=')
 		{
 			index = i;
 			break;
