@@ -22,7 +22,7 @@ ssize_t getline_inp(char **buffer)
 	ssize_t input;
 	size_t buffer_size = 0;
 
-	input = getline(buffer, &buffer_size, stdin);
+	input = _getline(buffer, &buffer_size, stdin);
 	if (input == -1)
 	{
 		return (-1);
