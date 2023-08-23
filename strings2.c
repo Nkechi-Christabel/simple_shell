@@ -45,6 +45,14 @@ char *_strdup(const char *str)
 	return (ret);
 }
 
+/**
+ * _strchr -  function searches for the first occurrence of the character ch
+ *
+ * @str: contains the string
+ * @ch: character to be searched for
+ *
+ * Return: (char *)str
+ */
 char *_strchr(const char *str, int ch)
 {
 	while (*str != '\0')
@@ -60,22 +68,28 @@ char *_strchr(const char *str, int ch)
 	{
 		return ((char *)str);
 	}
-    
 	return (NULL);
 }
 
+/**
+ * _strndup - duplicates a string
+ * @str: the string to duplicate
+ * @n: number of the string to duplicate
+ *
+ * Return: pointer to the duplicated string
+ */
 char *_strndup(const char *str, size_t n)
 {
-	size_t length = strlen(str), i;
+	size_t length = _strlen(str), i;
 	char *new_str;
 
 	if (length > n)
 		length = n;
-    
+
 	new_str = (char *)malloc(length + 1);
 	if (new_str == NULL)
 		return (NULL);
-    
+
 	for (i = 0; i < length; i++)
 	{
 		new_str[i] = str[i];
@@ -85,13 +99,21 @@ char *_strndup(const char *str, size_t n)
 	return (new_str);
 }
 
+/**
+ * _strcspn - function calculates the length of the initial segment of the str
+ *
+ * @str: contains the string
+ * @reject: segment to be searched
+ *
+ * Return: count
+ */
 size_t _strcspn(const char *str, const char *reject)
 {
 	size_t count = 0;
 
 	while (str[count] != '\0')
 	{
-		if (strchr(reject, str[count]) != NULL)
+		if (_strchr(reject, str[count]) != NULL)
 			break;
 		count++;
 	}

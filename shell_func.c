@@ -12,7 +12,7 @@ void exit_func(char *buffer, char *shell_name, int *line)
 {
 	if (_strncmp(buffer, "exit", 4) == 0)
 	{
-		int status, i = 0, isNum;
+		int status, i = 0, isNum = 1;
 		char *arg = buffer + 4;
 
 		if (*arg == '\0')
@@ -22,10 +22,8 @@ void exit_func(char *buffer, char *shell_name, int *line)
 		}
 		while (*arg == ' ')
 			arg++;
-
 		if (*arg)
 		{
-			isNum = 1;
 			while (arg[i])
 			{
 				if (arg[i] < '0' || arg[i] > '9')
