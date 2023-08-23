@@ -1,19 +1,35 @@
 #include "shell.h"
 
+/**
+ * _strpbrk - function searches for the first character in the str string
+ * that matches any character from the accept string
+ *
+ * @str: contains the string
+ * @accept: contains string to be searched for
+ *
+ * Return: (char *)str
+ */
 char *_strpbrk(const char *str, const char *accept)
 {
 	while (*str != '\0')
 	{
 		if (_strchr(accept, *str) != NULL)
-			return (char *)str;
+			return ((char *)str);
 		str++;
 	}
-	return NULL;
+	return (NULL);
 }
 
+/**
+ * _isspace - checks for space
+ * @c: contains the string
+ *
+ * Return: ture or false
+ */
 int _isspace(char c)
 {
-	return (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r');
+	return (c == ' ' || c == '\t' || c == '\n' || c == '\v' ||
+			c == '\f' || c == '\r');
 }
 
 /**

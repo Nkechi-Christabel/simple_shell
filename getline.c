@@ -44,6 +44,7 @@ ssize_t getline_inp(char **buffer)
  *
  * Return: pos if success and -1 if failed
  */
+
 ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 {
 	static char buffer[BUFFER_SIZE];
