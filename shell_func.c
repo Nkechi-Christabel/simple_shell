@@ -183,6 +183,7 @@ char *find_executable_path(const char *cmd)
 		if (full_path == NULL)
 		{
 			perror("Memory allocation failed");
+			free(full_path);
 			exit(EXIT_FAILURE);
 		}
 		_strcpy(full_path, dir);
