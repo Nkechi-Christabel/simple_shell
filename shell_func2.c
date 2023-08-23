@@ -15,6 +15,15 @@ int call_fork(char *buffer, char **args, char *command_path)
 	pid_t pid;
 	int status;
 
+	if (access(command_path, X_OK) == -1)
+	{
+		perror("Command doesn't exist or is not executable");
+		free(buffer);
+		free(command_path);
+		exit(EXIT_FAILURE);
+
+	}
+
 	pid = fork();
 	if (pid == -1)
 	{
