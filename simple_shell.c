@@ -19,7 +19,7 @@ int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 	args = tokens(replaced_command);
 
 	command_path = find_executable_path(args[0]);
-	if (command_path == NULL)
+	if (!command_path || access(command_path, X_OK) == -1)
 	{
 		print_error(shell_name, line, args[0]);
 		free(args);
@@ -28,7 +28,6 @@ int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 	}
 
 	status = call_fork(buffer, args, command_path);
-
 
 	for (i = 0; args[i] != NULL; i++)
 		free(args[i]);
