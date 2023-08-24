@@ -85,6 +85,7 @@ ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 			*lineptr = new_ptr;
 		}
 	}
+	
 	(*lineptr)[pos] = '\0';
 	return (pos);
 }

@@ -87,7 +87,7 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 		if (last_status && is_interactive == 0)
 		{
 			free(buffer);
-			exit(last_status);
+			return (last_status);
 		}
 		free(buffer);
 	}

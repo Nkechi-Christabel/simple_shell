@@ -76,6 +76,7 @@ void create_or_modify_alias(const char *token, Alias *aliases,
 			aliases[alias_index].value = _strdup(equal_sign + 1);
 		}
 	}
+
 }
 
 /**
