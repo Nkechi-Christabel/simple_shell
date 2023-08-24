@@ -29,7 +29,6 @@ int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 
 	status = call_fork(buffer, args, command_path);
 
-
 	for (i = 0; args[i] != NULL; i++)
 		free(args[i]);
 
