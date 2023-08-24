@@ -77,6 +77,8 @@ void print_error3(char *shell_name, int *line, char *command)
 
 /**
  * env_builtin - Print the current environment variables
+ *
+ * @buffer: contains the command
  * @envp: Array of environment variables
  */
 void env_builtin(char *buffer, char **envp)
