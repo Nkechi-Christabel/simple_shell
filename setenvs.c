@@ -1,39 +1,6 @@
 
 #include "shell.h"
 
-/**
- * _putenv - Sets a new or modify an environment variable
- * @str: The name of the environment variable to set or modify
- *
- * Return: 0 if successful or -1 if not
- */
-
-int _putenv(const char *str)
-{
-	char *env_str = strdup(str), *equal_sign;
-	int result;
-
-	if (env_str == NULL)
-	{
-		perror("Memory allocation error");
-		return (-1);
-	}
-
-	equal_sign = _strchr(env_str, '=');
-
-	if (equal_sign == NULL)
-	{
-		free(env_str);
-		return (-1);
-	}
-
-	*equal_sign = '\0';
-
-	result = _setenv(env_str, equal_sign + 1, 1);
-
-	free(env_str);
-	return (result);
-}
 
 /**
  * _setenv - Set or modify an environment variable

@@ -1,5 +1,21 @@
 #include "shell.h"
 
+
+/**
+ * free_aliases - Frees memory used by aliases
+ * @aliases: An array of Alias structure
+ * @num_aliases: The number of aliases
+ */
+void free_aliases(Alias *aliases, int num_aliases)
+{
+	int i;
+
+	for (i = 0; i < num_aliases; i++)
+	{
+		free(aliases[i].value);
+	}
+}
+
 /**
  * print_string - Prints string to standard output
  * @str: The string to print
@@ -75,6 +91,7 @@ void create_or_modify_alias(const char *token, Alias *aliases,
 			free(aliases[alias_index].value);
 			aliases[alias_index].value = _strdup(equal_sign + 1);
 		}
+
 	}
 
 }
@@ -116,7 +133,7 @@ void alias_builtin(char *buffer, Alias *aliases, int *num_aliases)
 			print_string(aliases[alias_index].value);
 			print_string("'\n");
 		}
-
 		free(command);
 	}
+
 }
