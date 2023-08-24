@@ -166,7 +166,7 @@ int handle_input2(char *buffer, char *current_dir, char *envp[],
 	if (_strncmp(buffer, "setenv", 6) == 0)
 		setenv_builtin(buffer, &envp);
 	else if (_strncmp(buffer, "env", 3) == 0)
-		env_builtin(envp);
+		env_builtin(buffer, envp);
 	else if (_strncmp(buffer, "unsetenv", 8) == 0)
 		unsetenv_builtin(buffer, &envp);
 	else if (_strncmp(buffer, "alias", 5) == 0)

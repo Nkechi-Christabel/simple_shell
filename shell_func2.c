@@ -9,7 +9,6 @@
  *
  * Return: WEXITSTATUS(status)
  */
-
 int call_fork(char *buffer, char **args, char *command_path)
 {
 	pid_t pid;
