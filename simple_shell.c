@@ -141,6 +141,7 @@ int main(int argc, char *argv[], char *envp[])
 		if (last_status)
 			exit(last_status);
 	}
+	free_aliases(aliases, num_aliases);
 	return (0);
 }
 /**
