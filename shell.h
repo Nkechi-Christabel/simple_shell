@@ -12,7 +12,7 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <errno.h>
 
 extern char **environ;
 
