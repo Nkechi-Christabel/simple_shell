@@ -68,7 +68,6 @@ int _setenv(const char *name, const char *value, int overwrite)
 
 	result = putenv(new_var);
 
-	free(new_var);
 	return (result);
 }
 
