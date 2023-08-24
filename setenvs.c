@@ -66,9 +66,8 @@ int _setenv(const char *name, const char *value, int overwrite)
 	_strcat(new_var, "=");
 	_strcat(new_var, value);
 
-	result = _putenv(new_var);
+	result = putenv(new_var);
 
-	free(new_var);
 	return (result);
 }
 
