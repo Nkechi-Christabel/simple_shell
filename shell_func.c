@@ -77,48 +77,24 @@ void print_error3(char *shell_name, int *line, char *command)
 
 /**
  * env_builtin - Print the current environment variables
+ *
+ * @buffer: contains the command
  * @envp: Array of environment variables
  */
-
-void env_builtin(char **envp)
+void env_builtin(char *buffer, char **envp)
 {
-	const char *desired_order[] = {
-		"LESSOPEN", "USER", "SHLVL", "MOTD_SHOWN", "HOME", "OLDPWD",
-		"WSL_DISTRO_NAME", "LOGNAME", "NAME", "_", "TERM", "PATH", "LANG",
-		"LS_COLORS", "SHELL", "LESSCLOSE", "PWD", "XDG_DATA_DIRS",
-		"HOSTTYPE", "WSLENV",
-		NULL
-	};
-	int i, j, found;
-	char **env_var, **rem;
+	int i = 0;
+	size_t len;
 
-	for (i = 0; desired_order[i] != NULL; i++)
+	if (strcmp(buffer, "env") == 0)
 	{
-		for (env_var = envp; *env_var != NULL; env_var++)
+		while (envp[i] != NULL)
 		{
-			if (_strncmp(*env_var, desired_order[i], _strlen(desired_order[i])) == 0)
-			{
-				write(STDOUT_FILENO, *env_var, _strlen(*env_var));
-				write(STDOUT_FILENO, "\n", 1);
-				break;
-			}
-		}
-	}
-	for (rem = envp; *rem != NULL; rem++)
-	{
-		found = 0;
-		for (j = 0; desired_order[j] != NULL; j++)
-		{
-			if (_strncmp(*rem, desired_order[j], _strlen(desired_order[j])) == 0)
-			{
-				found = 1;
-				break;
-			}
-		}
-		if (!found)
-		{
-			write(STDOUT_FILENO, *rem, _strlen(*rem));
+			len = strlen(envp[i]);
+
+			write(STDOUT_FILENO, envp[i], len);
 			write(STDOUT_FILENO, "\n", 1);
+			i++;
 		}
 	}
 }
@@ -183,7 +159,6 @@ char *find_executable_path(const char *cmd)
 		if (full_path == NULL)
 		{
 			perror("Memory allocation failed");
-			free(full_path);
 			exit(EXIT_FAILURE);
 		}
 		_strcpy(full_path, dir);

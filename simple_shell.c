@@ -29,7 +29,6 @@ int handle_exec(char *buffer, int last_status, char *shell_name, int *line)
 
 	status = call_fork(buffer, args, command_path);
 
-
 	for (i = 0; args[i] != NULL; i++)
 		free(args[i]);
 
@@ -88,7 +87,7 @@ int handle_input(char *current_dir, char *envp[], Alias *aliases,
 		if (last_status && is_interactive == 0)
 		{
 			free(buffer);
-			exit(last_status);
+			return (last_status);
 		}
 		free(buffer);
 	}
@@ -168,7 +167,7 @@ int handle_input2(char *buffer, char *current_dir, char *envp[],
 	if (_strncmp(buffer, "setenv", 6) == 0)
 		setenv_builtin(buffer, &envp);
 	else if (_strncmp(buffer, "env", 3) == 0)
-		env_builtin(envp);
+		env_builtin(buffer, envp);
 	else if (_strncmp(buffer, "unsetenv", 8) == 0)
 		unsetenv_builtin(buffer, &envp);
 	else if (_strncmp(buffer, "alias", 5) == 0)

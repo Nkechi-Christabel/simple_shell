@@ -12,7 +12,7 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <errno.h>
 
 extern char **environ;
 
@@ -35,7 +35,7 @@ typedef struct Alias
 
 
 ssize_t getline_inp(char **buffer);
-void env_builtin(char **envp);
+void env_builtin(char *buffer, char **envp);
 char **tokens(char *buffer);
 void exit_func(char *buffer, char *shell_name, int *line);
 int call_fork(char *buffer, char **args, char *command_path);

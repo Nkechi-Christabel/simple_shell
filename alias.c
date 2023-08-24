@@ -93,6 +93,7 @@ void create_or_modify_alias(const char *token, Alias *aliases,
 		}
 
 	}
+
 }
 
 /**
