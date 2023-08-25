@@ -33,10 +33,6 @@ typedef struct Alias
 	char *value;
 } Alias;
 
-void free_resources(char *buffer, char *command_path, char **args);
-void child_process(int pipe_fd[], char *buffer, char *command_path, char **args);
-void parent_process(int pipe_fd[], char *buffer, char *command_path, char **args,
-		pid_t pid, int *status);
 ssize_t getline_inp(char **buffer);
 void env_builtin(char *buffer, char **envp);
 char **tokens(char *buffer);
