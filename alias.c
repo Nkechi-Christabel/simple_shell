@@ -11,9 +11,7 @@ void free_aliases(Alias *aliases, int num_aliases)
 	int i;
 
 	for (i = 0; i < num_aliases; i++)
-	{
 		free(aliases[i].value);
-	}
 }
 
 /**
