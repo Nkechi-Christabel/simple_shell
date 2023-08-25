@@ -35,7 +35,7 @@ typedef struct Alias
 
 
 ssize_t getline_inp(char **buffer);
-void env_builtin(char **envp);
+void env_builtin(char *buffer, char **envp);
 char **tokens(char *buffer);
 void exit_func(char *buffer, char *shell_name, int *line);
 int call_fork(char *buffer, char **args, char *command_path);
@@ -60,6 +60,7 @@ void list_aliases(Alias *aliases, int num_aliases);
 void create_or_modify_alias(const char *token, Alias *aliases,
 		int *num_aliases);
 void alias_builtin(char *buffer, Alias *aliases, int *num_aliases);
+void free_aliases(Alias *aliases, int num_aliases);
 char *replace_variables(const char *command, int last_status);
 char *replace_exit_status(char *result, size_t *len, int status);
 char *replace_process_id(char *result, size_t *len);

@@ -42,6 +42,7 @@ char *_strdup(const char *str)
 		return (NULL);
 	for (length++; length--;)
 		ret[length] = *--str;
+
 	return (ret);
 }
 
@@ -96,6 +97,7 @@ char *_strndup(const char *str, size_t n)
 	}
 	new_str[length] = '\0';
 
+	free(new_str);
 	return (new_str);
 }
 
